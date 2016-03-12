@@ -91,8 +91,8 @@ install_mariadb
 install_varnish
 cp configs/default.vcl /etc/varnish/default.vcl
 sed -i s"/Web.Server.IP/${SERVERIP}/" /etc/varnish/default.vcl
-install_wordpress
 install_haproxy
+install_wordpress
 service nginx restart
 service php5-fpm restart
 service varnish restart
