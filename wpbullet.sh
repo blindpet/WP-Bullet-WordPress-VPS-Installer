@@ -49,7 +49,7 @@ ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 install_mariadb
 install_varnish
 cp configs/default.vcl /etc/varnish/default.vcl
-sed -i s'/Web.Server.IP/${SERVERIP}/' /etc/varnish/default.vcl
+sed -i s"/Web.Server.IP/${SERVERIP}/" /etc/varnish/default.vcl
 install_wordpress
 service nginx restart
 service php5-fpm restart
@@ -108,7 +108,7 @@ debconf-apt-progress -- apt-get install curl php5-curl php5-mysql php5-cli php5-
 mkdir -p /var/www/${WORDPRESSSITE}
 cd /var/www/${WORDPRESSSITE}
 wget http://wordpress.org/latest.tar.gz
-tar --strip-components=1 -xvf latest.tar.gz
+tar --strip-components=1 -xf latest.tar.gz
 rm latest.tar.gz
 chown -R www-data:www-data /var/www/${WORDPRESSSITE}
 
