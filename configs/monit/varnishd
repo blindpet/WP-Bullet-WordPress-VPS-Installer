@@ -1,0 +1,6 @@
+check process varnish matching "varnishd"
+    start program = "/usr/sbin/service varnish start" with timeout 60 seconds
+    stop program  = "/usr/sbin/service varnish stop"
+    if failed host 127.0.0.1 port 6082 then restart 
+    if failed host 127.0.0.1 port 80 with timeout 30 seconds for 3 cycles then alert
+    if failed host 127.0.0.1 port 80 with timeout 30 seconds for 5 cycles then restart
