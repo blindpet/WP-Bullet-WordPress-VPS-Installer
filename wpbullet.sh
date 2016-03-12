@@ -410,7 +410,6 @@ do
   echo "extension=redis.so" >> "${ini}"
 done
 service php5-fpm restart
-installer
 }
 
 install_memcached () {
@@ -485,7 +484,6 @@ do
   echo "extension=memcached.so" >> "${ini}"
 done
 service php5-fpm restart
-installer
 }
 
 #--------------------------------------------------------------------------------------------------------------------------------
