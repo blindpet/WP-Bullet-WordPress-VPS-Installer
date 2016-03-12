@@ -1,0 +1,5 @@
+check process mysql with pidfile /var/run/mysqld/mysqld.pid
+    start program = "/usr/sbin/service mysql start" with timeout 60 seconds
+    stop program = "/usr/sbin/service mysql stop"
+    if failed unixsocket /var/run/mysqld/mysqld.sock then restart
+    if failed host 127.0.0.1 port 3306 protocol mysql then restart
