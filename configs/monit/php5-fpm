@@ -1,0 +1,4 @@
+check process php5-fpm with pidfile /var/run/php5-fpm.pid
+    start program = "/usr/sbin/service php5-fpm start" with timeout 60 seconds
+    stop program  = "/usr/sbin/service php5-fpm stop"
+    if failed unixsocket /var/run/php5-fpm.sock then restart
