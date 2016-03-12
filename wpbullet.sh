@@ -39,7 +39,28 @@ exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 
 install_nginx_varnish () {
 #--------------------------------------------------------------------------------------------------------------------------------
-# Install dotdeb repo
+# Install nginx and Varnish
+#--------------------------------------------------------------------------------------------------------------------------------
+get_user_input
+install_dotdeb
+install_nginx
+cp configs/wordpressvarnish /etc/nginx/sites-available/wordpress
+ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
+install_mariadb
+install_varnish
+cp configs/default.vcl /etc/varnish/default.vcl
+sed -i s'/Web.Server.IP/${SERVERIP}/' /etc/varnish/default.vcl
+install_wordpress
+service nginx restart
+service php5-fpm restart
+service varnish restart
+show_credentials
+clear_bash_history
+}
+
+install_nginx_varnish_haproxy () {
+#--------------------------------------------------------------------------------------------------------------------------------
+# install nginx with Varnish SSL Terminal from haproxy
 #--------------------------------------------------------------------------------------------------------------------------------
 get_user_input
 install_dotdeb
@@ -47,6 +68,11 @@ install_nginx
 install_mariadb
 install_varnish
 install_wordpress
+install_haproxy
+service nginx restart
+service php5-fpm restart
+service varnish restart
+service haproxy restart
 show_credentials
 clear_bash_history
 }
@@ -123,7 +149,7 @@ EOF
 debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install varnish -y
 mkdir -p /etc/systemd/system/varnish.service.d/
-cat > /systemd/system/varnish.service.d/local.conf<<EOF
+cat > /etc/systemd/system/varnish.service.d/local.conf<<EOF
 [Service]
 ExecStart=
 ExecStart=/usr/sbin/varnishd -a :80 -T localhost:6082 -f /etc/varnish/default.vcl -S /etc/varnish/secret -s malloc,256m
@@ -141,7 +167,9 @@ cat > /etc/apt/sources.list.d/haproxy.list<<EOF
 deb http://ppa.launchpad.net/vbernat/haproxy-1.6/ubuntu trusty main
 EOF
 debconf-apt-progress -- apt-get update
-debconf-apt-progress -- apt-get install haproxy -y
+debconf-apt-progress -- apt-get install openssl haproxy -y
+#openssl req -new -newkey rsa:2048 -nodes -out wpbullet.pem -keyout wpbullet.pem -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.example.com"
+openssl req -new -newkey rsa:2048 -nodes -out /etc/ssl/wpbullet.pem -keyout /etc/ssl/wpbullet.pem -subj "/CN=localhost"
 }
 
 install_webmin () {
@@ -185,6 +213,7 @@ cd /tmp
 wget http://www.webmin.com/webmin/download/modules/phpini.wbm.gz
 cd /usr/share/webmin
 perl install-module.pl /tmp/phpini.wbm.gz
+echo "CSF Firewall is installed, configure it with this guide"
 }
 
 install_suhosin () {
@@ -215,7 +244,7 @@ service php5-fpm restart
 
 whiptail --title "Welcome to the WP Bullet WordPress VPS Installer" --msgbox "This Ubuntu and Debian Installer will prompt for credentials and autoconfigure everything" 8 78
 #get ip
-showip=$(ifconfig eth0 | awk -F"[: ]+" '/inet addr:/ {print $4}')
+SERVERIP=$(ifconfig eth0 | awk -F"[: ]+" '/inet addr:/ {print $4}')
 
 
 #--------------------------------------------------------------------------------------------------------------------------------
@@ -239,14 +268,14 @@ ins_variable=$(whiptail --ok-button "Choose" --title "WP Bullet VPS Installer fo
 case $ins_variable in
 	"nginx + fastcgi caching") 			install_nginx_fastcgi;;
 	"nginx + Varnish") 					install_nginx_varnish;;
-	"nginx + Varnish + haproxy") 		ins_nginx_fastcgi="true";;
-	"Monit") 							ins_monit="true";;
-	"Webmin") 							ins_webmin="true";;
-	"CSF Firewall") 					ins_csf="true";;
-	"Suhosin") 							ins_suhosin="true";;
-	"Enable CloudFlare for nginx") 		ins_cf_nginx="true";;
-	"Enable CloudFlare for Varnish") 	ins_cf_varnish="true";;
-	"Create SWAP File") 				ins_swap="true";;
+	"nginx + Varnish + haproxy") 		install_nginx_varnish_haproxy="true";;
+	"Monit") 							install_monit;;
+	"Webmin") 							install_webmin;;
+	"CSF Firewall") 					install_csf;;
+	"Suhosin") 							install_suhosin;;
+	"Enable CloudFlare for nginx") 		install_cf_nginx;;
+	"Enable CloudFlare for Varnish") 	install_cf_varnish;;
+	"Create SWAP File") 				install_swap;;
                 *)
                 ;;
 esac
