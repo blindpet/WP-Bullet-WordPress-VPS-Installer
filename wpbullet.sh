@@ -46,6 +46,7 @@ install_dotdeb
 install_nginx
 cp configs/wordpressvarnish /etc/nginx/sites-available/wordpress
 ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
+sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
 install_mariadb
 install_varnish
 cp configs/default.vcl /etc/varnish/default.vcl
