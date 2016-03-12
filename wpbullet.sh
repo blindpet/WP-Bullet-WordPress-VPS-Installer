@@ -49,6 +49,31 @@ ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
 install_mariadb
 install_wordpress
+#Fix CloudFlare IP
+cat > /etc/nginx/conf.d/cloudflare.conf<<EOF
+#CloudFlare
+set_real_ip_from   199.27.128.0/21;
+set_real_ip_from   173.245.48.0/20;
+set_real_ip_from   103.21.244.0/22;
+set_real_ip_from   103.22.200.0/22;
+set_real_ip_from   103.31.4.0/22;
+set_real_ip_from   141.101.64.0/18;
+set_real_ip_from   108.162.192.0/18;
+set_real_ip_from   190.93.240.0/20;
+set_real_ip_from   188.114.96.0/20;
+set_real_ip_from   197.234.240.0/22;
+set_real_ip_from   198.41.128.0/17;
+set_real_ip_from   162.158.0.0/15;
+set_real_ip_from   104.16.0.0/12;
+set_real_ip_from   172.64.0.0/13;
+set_real_ip_from   2400:cb00::/32;
+set_real_ip_from   2606:4700::/32;
+set_real_ip_from   2803:f800::/32;
+set_real_ip_from   2405:b500::/32;
+set_real_ip_from   2405:8100::/32;
+#Set the real ip header
+real_ip_header     CF-Connecting-IP;
+EOF
 service nginx restart
 service php5-fpm restart
 show_credentials
@@ -70,6 +95,32 @@ install_varnish
 cp configs/default.vcl /etc/varnish/default.vcl
 sed -i s"/Web.Server.IP/${SERVERIP}/" /etc/varnish/default.vcl
 install_wordpress
+#Fix CloudFlare IP
+cat > /etc/nginx/conf.d/cloudflare.conf<<EOF
+#CloudFlare
+set_real_ip_from   199.27.128.0/21;
+set_real_ip_from   173.245.48.0/20;
+set_real_ip_from   103.21.244.0/22;
+set_real_ip_from   103.22.200.0/22;
+set_real_ip_from   103.31.4.0/22;
+set_real_ip_from   141.101.64.0/18;
+set_real_ip_from   108.162.192.0/18;
+set_real_ip_from   190.93.240.0/20;
+set_real_ip_from   188.114.96.0/20;
+set_real_ip_from   197.234.240.0/22;
+set_real_ip_from   198.41.128.0/17;
+set_real_ip_from   162.158.0.0/15;
+set_real_ip_from   104.16.0.0/12;
+set_real_ip_from   172.64.0.0/13;
+set_real_ip_from   2400:cb00::/32;
+set_real_ip_from   2606:4700::/32;
+set_real_ip_from   2803:f800::/32;
+set_real_ip_from   2405:b500::/32;
+set_real_ip_from   2405:8100::/32;
+#Set the real ip header
+set_real_ip_from   127.0.0.1/32;
+real_ip_header     X-Actual-IP;
+EOF
 service nginx restart
 service php5-fpm restart
 service varnish restart
@@ -96,6 +147,32 @@ install_wordpress
 #WordPress SSL fix
 echo "if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
         \$_SERVER['HTTPS']='on';" >> /var/www/${WORDPRESSSITE}/wp-config.php
+#Fix CloudFlare IP
+cat > /etc/nginx/conf.d/cloudflare.conf<<EOF
+#CloudFlare
+set_real_ip_from   199.27.128.0/21;
+set_real_ip_from   173.245.48.0/20;
+set_real_ip_from   103.21.244.0/22;
+set_real_ip_from   103.22.200.0/22;
+set_real_ip_from   103.31.4.0/22;
+set_real_ip_from   141.101.64.0/18;
+set_real_ip_from   108.162.192.0/18;
+set_real_ip_from   190.93.240.0/20;
+set_real_ip_from   188.114.96.0/20;
+set_real_ip_from   197.234.240.0/22;
+set_real_ip_from   198.41.128.0/17;
+set_real_ip_from   162.158.0.0/15;
+set_real_ip_from   104.16.0.0/12;
+set_real_ip_from   172.64.0.0/13;
+set_real_ip_from   2400:cb00::/32;
+set_real_ip_from   2606:4700::/32;
+set_real_ip_from   2803:f800::/32;
+set_real_ip_from   2405:b500::/32;
+set_real_ip_from   2405:8100::/32;
+#Set the real ip header
+set_real_ip_from   127.0.0.1/32;
+real_ip_header     X-Actual-IP;
+EOF
 service nginx restart
 service php5-fpm restart
 service varnish restart
@@ -270,6 +347,67 @@ done
 service php5-fpm restart
 }
 
+install_redis () {
+#--------------------------------------------------------------------------------------------------------------------------------
+# Install suhosin
+#--------------------------------------------------------------------------------------------------------------------------------
+debconf-apt-progress -- apt-get update
+debconf-apt-progress -- apt-get install php5-dev build-essential -y
+cd /tmp
+#build redis
+wget http://download.redis.io/redis-stable.tar.gz
+tar xzf redis*
+cd redis*
+sudo make
+sudo make install PREFIX=/usr
+sudo mkdir /etc/redis
+sudo cp redis.conf /etc/redis/
+cd ..
+rm -Rf redis*
+#add redis user
+adduser --system --user-group redis --no-create-home --shell /bin/nologin
+mv /etc/redis/redis.conf /etc/redis/redis.conf.bak
+#create redis configuration
+cat > /etc/redis/redis.conf<<EOF
+bind 127.0.0.1
+daemonize yes
+stop-writes-on-bgsave-error no
+rdbcompression yes
+maxmemory 50M
+maxmemory-policy allkeys-lru
+EOF
+cat > /etc/systemd/system/redis-server.service<<EOF
+[Unit]
+Description=Redis Datastore Server
+After=network.target
+[Service]
+Type=forking
+User=redis
+Group=redis
+ExecStart=/usr/bin/redis-server /etc/redis/redis.conf --daemonize yes
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable redis-server
+service redis-server start
+#build the php extension
+cd /tmp
+debconf-apt-progress -- git -y
+git clone https://github.com/phpredis/phpredis
+cd phpredis
+phpize
+./configure
+make
+make install
+PHPINI=($(find / -iname php.ini))
+for ini in "${PHPINI[@]}"
+do
+  echo "extension=redis.so" >> "${ini}"
+done
+service php5-fpm restart
+installer
+}
+
 #--------------------------------------------------------------------------------------------------------------------------------
 # WELCOME SCREEN
 #--------------------------------------------------------------------------------------------------------------------------------
@@ -292,22 +430,22 @@ ins_variable=$(whiptail --ok-button "Choose" --title "WP Bullet VPS Installer fo
 "Webmin" "Easy GUI VPS administration"  \
 "CSF Firewall" "Comprehensive Firewall"  \
 "Suhosin" "Enable PHP Security"  \
-"Enable CloudFlare for nginx" "Get real visitor IP for nginx"  \
-"Enable CloudFlare for Varnish" "Get real visitor IP for Varnish"  \
+"Redis" "Install Redis Server"  \
+"Memcached" "Install Memcached"  \
 "Create SWAP File" "Creates SWAP on your VPS"  3>&1 1>&2 2>&3) exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 
 
 case $ins_variable in
-	"nginx + fastcgi caching") 			install_nginx_fastcgi;;
-	"nginx + Varnish") 					install_nginx_varnish;;
+	"nginx + fastcgi caching") 		install_nginx_fastcgi;;
+	"nginx + Varnish") 			install_nginx_varnish;;
 	"nginx + Varnish + haproxy") 		install_nginx_varnish_haproxy;;
-	"Monit") 							install_monit;;
-	"Webmin") 							install_webmin;;
-	"CSF Firewall") 					install_csf;;
-	"Suhosin") 							install_suhosin;;
-	"Enable CloudFlare for nginx") 		install_cf_nginx;;
-	"Enable CloudFlare for Varnish") 	install_cf_varnish;;
-	"Create SWAP File") 				install_swap;;
+	"Monit") 				install_monit;;
+	"Webmin") 				install_webmin;;
+	"CSF Firewall") 			install_csf;;
+	"Suhosin") 				install_suhosin;;
+	"Redis") 				install_redis;;
+	"Memcached") 				install_memcached;;
+	"Create SWAP File") 			install_swap;;
                 *)
                 ;;
 esac
