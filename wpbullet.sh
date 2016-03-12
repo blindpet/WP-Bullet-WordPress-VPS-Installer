@@ -251,7 +251,8 @@ install_varnish (){
 #--------------------------------------------------------------------------------------------------------------------------------
 # Install high-performance HTTP accelerator
 #-------------------------------------------------------------------------------------------------------------------------------- 
-apt-get install apt-transport-https -y
+debconf-apt-progress -- apt-get update
+debconf-apt-progress -- apt-get install apt-transport-https -y
 wget -qO - https://repo.varnish-cache.org/GPG-key.txt | apt-key add -
 cat > /etc/apt/sources.list.d/varnish-cache.list<<EOF
 deb https://repo.varnish-cache.org/debian/ jessie varnish-4.1
@@ -338,7 +339,7 @@ debconf-apt-progress -- apt-get install php5-dev git build-essential -y
 cd /tmp
 SUHOSINLATEST=$(wget -q -O - https://github.com/stefanesser/suhosin/releases/ | grep tar.gz | awk -F [\"] 'NR==1 {print $2}')
 wget https://github.com$SUHOSINLATEST -O suhosin.tar.gz
-tar -xvf suhosin.tar.gz
+tar -xf suhosin.tar.gz
 cd suhosin*
 phpize
 ./configure
@@ -363,14 +364,14 @@ cd /tmp
 wget http://download.redis.io/redis-stable.tar.gz
 tar xzf redis*
 cd redis*
-sudo make
-sudo make install PREFIX=/usr
-sudo mkdir /etc/redis
-sudo cp redis.conf /etc/redis/
+make
+make install PREFIX=/usr
+mkdir /etc/redis
+cp redis.conf /etc/redis/
 cd ..
 rm -Rf redis*
 #add redis user
-adduser --system --user-group redis --no-create-home --shell /bin/nologin
+adduser --system --group --disabled-login redis --home /usr/bin/redis-server --shell /bin/nologin --quiet
 mv /etc/redis/redis.conf /etc/redis/redis.conf.bak
 #create redis configuration
 cat > /etc/redis/redis.conf<<EOF
@@ -385,11 +386,15 @@ cat > /etc/systemd/system/redis-server.service<<EOF
 [Unit]
 Description=Redis Datastore Server
 After=network.target
+
 [Service]
 Type=forking
+Restart=always
 User=redis
-Group=redis
-ExecStart=/usr/bin/redis-server /etc/redis/redis.conf --daemonize yes
+ExecStart=/sbin/start-stop-daemon --start --pidfile /var/run/redis/redis.pid --umask 007 --exec /usr/bin/redis-server -- /etc/redis/redis.conf
+
+ExecReload=/bin/kill -USR2 $MAINPID
+
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -420,13 +425,13 @@ debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install libevent-dev php5-dev build-essential -y
 MEMCACHELATEST=$(wget -q http://www.memcached.org -O - | grep tar.gz | awk -F "[\"]" '{print $2}')
 cd /tmp
-wget $MEMCACHELATEST -O memcached.tar.gz
+wget -q $MEMCACHELATEST -O memcached.tar.gz
 tar -xf memcached.tar.gz
 cd memcached*
 ./configure
 make
 make install
-adduser --system --group --disabled-login memcached --no-create-home --shell /bin/nologin --quiet
+aadduser --system --group --disabled-login memcached --home /usr/bin/memcached --shell /bin/nologin --quiet
 cat > /etc/memcached.conf<<EOF
 # Run memcached as a daemon. This command is implied, and is not needed for the
 # daemon to run. See the README.Debian that comes with this package for more
@@ -464,8 +469,8 @@ service memcached start
 #build libmemcached first
 debconf-apt-progress -- apt-get install libsasl2-dev git php5-dev pkg-config -y
 cd /tmp
-wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
-tar -xvf libmemcached-1.0.18.tar.gz
+wget -q https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
+tar -xf libmemcached-1.0.18.tar.gz
 cd libmemcached*
 ./configure
 make
@@ -550,7 +555,21 @@ if (find /var/run -iname miniserv.pid > /dev/null); then
 cp $MONITCONFIGSFOLDER/webmin /etc/monit/conf.d/webmin
 fi
 service monit restart
+}
 
+install_swap () {
+#--------------------------------------------------------------------------------------------------------------------------------
+# Install swap
+#--------------------------------------------------------------------------------------------------------------------------------
+swapoff -a
+dd if=/dev/zero of=/swapfile bs=1M count=1024
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo "/swapfile   none    swap    sw    0   0" >> /etc/fstab
+echo "vm.swappiness = 10" >> /etc/sysctl.conf
+echo "vm.vfs_cache_pressure = 50" >> /etc/sysctl.conf
+sysctl -p
 }
 
 #--------------------------------------------------------------------------------------------------------------------------------
@@ -560,7 +579,6 @@ service monit restart
 whiptail --title "Welcome to the WP Bullet WordPress VPS Installer" --msgbox "This Ubuntu and Debian Installer will prompt for credentials and autoconfigure everything" 8 78
 #get ip
 SERVERIP=$(ifconfig eth0 | awk -F"[: ]+" '/inet addr:/ {print $4}')
-
 
 #--------------------------------------------------------------------------------------------------------------------------------
 # MAIN INSTALL
