@@ -534,8 +534,8 @@ if [[ "$ins_nginx_varnish" == "true" ]]; 		then install_nginx_varnish;		fi
 if [[ "$ins_nginx_varnish_haproxy" == "true" ]]; 	then install_nginx_varnish_haproxy;	fi
 if [[ "$ins_webmin" == "true" ]]; 			then install_webmin;			fi
 if [[ "$ins_csf" == "true" ]]; 				then install_csf;			fi
-if [[ "$ins_suhosin" == "true" ]]; 			then install_pyload;			fi
-if [[ "$ins_redis" == "true" ]]; 			then inssall_redis;			fi
+if [[ "$ins_suhosin" == "true" ]]; 			then install_suhosin;			fi
+if [[ "$ins_redis" == "true" ]]; 			then install_redis;			fi
 if [[ "$ins_memcached" == "true" ]]; 			then install_memcached;			fi
 if [[ "$ins_monit" == "true" ]]; 			then install_monit;			fi
 if [[ "$ins_swap" == "true" ]]; 			then install_swap;			fi
