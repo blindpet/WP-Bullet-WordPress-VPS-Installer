@@ -1,0 +1,4 @@
+check process memcached matching "memcached"
+    start program = "/usr/sbin/service memcached start" with timeout 60 seconds
+    stop program  = "/usr/sbin/service memcached stop"
+    if failed host 127.0.0.1 port 11211 then restart
