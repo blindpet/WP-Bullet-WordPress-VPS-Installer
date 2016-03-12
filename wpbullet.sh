@@ -528,7 +528,7 @@ case $choice in
                 *)
                 ;;
 esac
-
+done < results
 if [[ "$ins_nginx_fastcgi" == "true" ]]; 		then install_nginx_fastcgi;		fi
 if [[ "$ins_nginx_varnish" == "true" ]]; 		then install_nginx_varnish;		fi
 if [[ "$ins_nginx_varnish_haproxy" == "true" ]]; 	then install_nginx_varnish_haproxy;	fi
