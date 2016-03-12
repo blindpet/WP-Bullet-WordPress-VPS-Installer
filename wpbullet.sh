@@ -503,7 +503,7 @@ SERVERIP=$(ifconfig eth0 | awk -F"[: ]+" '/inet addr:/ {print $4}')
 
 whiptail --ok-button "Install" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --checklist --separate-output "\nIP:   ${SERVERIP}\n\nChoose what you want to install:" 25 99 12 \
 "nginx + fastcgi caching" "nginx with fastcgi caching        " off \
-"nginx + Varnish" "nginx with Varnish caching        "  \
+"nginx + Varnish" "nginx with Varnish caching        " off \
 "nginx + Varnish + haproxy" "nginx with Varnish caching SSL termination by haproxy" off \
 "Webmin" "Easy GUI VPS administration" off \
 "CSF Firewall" "Comprehensive Firewall" off \
@@ -527,7 +527,7 @@ case $choice in
 	"Create SWAP File") 			ins_swap="true";;
                 *)
                 ;;
-esac
+	esac
 done < results
 if [[ "$ins_nginx_fastcgi" == "true" ]]; 		then install_nginx_fastcgi;		fi
 if [[ "$ins_nginx_varnish" == "true" ]]; 		then install_nginx_varnish;		fi
