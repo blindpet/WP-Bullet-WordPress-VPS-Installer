@@ -1,0 +1,4 @@
+check process redis matching "redis-server"
+    start program = "/usr/sbin/service redis-server start" with timeout 60 seconds
+    stop program  = "/usr/sbin/service redis-server stop"
+    if failed host 127.0.0.1 port 6379 then restart
