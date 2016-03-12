@@ -304,8 +304,8 @@ install_csf () {
 #install csf
 apt-get install iptables unzip -y
 cd /tmp
-wget https://download.configserver.com/csf.tgz
-tar -xvf csf.tgz -C /opt
+wget -q https://download.configserver.com/csf.tgz
+tar -xf csf.tgz -C /opt
 cd /opt/csf
 bash /opt/csf/install.sh
 #install csf webmin module
@@ -313,7 +313,7 @@ cd /usr/share/webmin
 perl install-module.pl /etc/csf/csfwebmin.tgz
 #install nginx webmin module
 cd /tmp
-wget http://www.justindhoffman.com/sites/justindhoffman.com/files/nginx-0.08.wbm__0.gz
+wget -q http://www.justindhoffman.com/sites/justindhoffman.com/files/nginx-0.08.wbm__0.gz
 cd /usr/share/webmin
 perl install-module.pl /tmp/nginx-0.08.wbm__0.gz
 #install opcache webmin module
@@ -323,7 +323,7 @@ perl install-module.pl /tmp/nginx-0.08.wbm__0.gz
 #perl install-module.pl /tmp/php-opcache-status.wbm.gz
 #install php module
 cd /tmp
-wget http://www.webmin.com/webmin/download/modules/phpini.wbm.gz
+wget -q http://www.webmin.com/webmin/download/modules/phpini.wbm.gz
 cd /usr/share/webmin
 perl install-module.pl /tmp/phpini.wbm.gz
 echo "CSF Firewall is installed, configure it with this guide"
@@ -484,6 +484,73 @@ do
   echo "extension=memcached.so" >> "${ini}"
 done
 service php5-fpm restart
+}
+
+install_monit () {
+#--------------------------------------------------------------------------------------------------------------------------------
+# Install monit
+#--------------------------------------------------------------------------------------------------------------------------------
+MONITCONFIGSFOLDER=$(find / -iname monit | grep configs)
+debconf-apt-progress -- apt-get update
+debconf-apt-progress -- apt-get install monit openssl -y
+openssl req -new -x509 -days 365 -nodes -out /etc/ssl/monit.pem -keyout /etc/ssl/monit.pem -subj "/C=/ST=/L=/O=Company Name/OU=Org/CN=Monit"
+chmod 0700 /etc/ssl/monit.pem
+mv /etc/monit/monitrc /etc/monit/monitrc.bak
+cat > /etc/monitrc<<EOF
+set daemon 60 #check services every 60 seconds
+  set logfile /var/log/monit.log
+  set idfile /var/lib/monit/id
+  set statefile /var/lib/monit/state
+
+#Event queue
+  set eventqueue
+      basedir /var/lib/monit/events # set the base directory where events will be stored
+      slots 100                     # optionally limit the queue size
+
+#Mail settings
+# set mail-format {
+#     from: monit@$HOST
+#  subject: monit alert --  $EVENT $SERVICE
+#  message: $EVENT Service $SERVICE
+#                Date:        $DATE
+#                Action:      $ACTION
+#                Host:        $HOST
+#                Description: $DESCRIPTION
+#
+#           Your faithful employee,
+#           Monit } 
+#  set mailserver smtp.gmail.com port 587 
+#     username "wp" password "bullet"
+#  using TLSV1 with timeout 30 seconds
+#  set alert wpbullet@gmail.com #email address which will receive monit alerts
+
+#http settings
+ set httpd port 2812 address 0.0.0.0  # allow port 2812 connections on all network adapters
+    ssl enable
+    pemfile  /etc/ssl/monit.pem
+    allow 0.0.0.0/0.0.0.0 # allow all IPs, can use local subnet too
+#    allow htpcguides.crabdance.com        # allow dynamicdns address to connect
+    allow wp:"bullet"      # require user wp with password bullet
+
+#allow modular structure
+    include /etc/monit/conf.d/*
+EOF
+chmod 0700 /etc/monit/monitrc
+#create array to iterate over
+MONITCHECK=(nginx php5-fpm mysqld varnishd haproxy redis-server memcached lfd sshd)
+#loop through array and copy monit configuration if binary exists
+for monit in "${MONITCHECK[@]}"
+do
+  if hash "${monit}"  2>/dev/null; then
+        cp $MONITCONFIGSFOLDER/${monit} /etc/monit/conf.d/${monit}
+  fi
+done
+#hashing webmin doesn't work so check for the pid file instead
+if (find /var/run -iname miniserv.pid > /dev/null); then
+cp $MONITCONFIGSFOLDER/webmin /etc/monit/conf.d/webmin
+fi
+service monit restart
+
 }
 
 #--------------------------------------------------------------------------------------------------------------------------------
