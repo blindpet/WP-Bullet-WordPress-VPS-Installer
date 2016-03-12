@@ -1,0 +1,43 @@
+#WP-Bullet.com WordPress nginx virtualhost - Varnish compatible
+#DoS protection for wp-login.php, search and xml-rpc.php
+limit_req_zone $binary_remote_addr zone=one:10m rate=1r/s;
+
+server {
+  listen 8080;
+	server_name example.com www.example.com;
+	access_log   /var/log/nginx/example.com.access.log;
+	error_log    /var/log/nginx/example.com.error.log;
+	root /var/www/example.com/;
+	index index.php;
+	
+	location = /wp-login.php {
+    limit_req   zone=one  burst=1 nodelay;
+    include fastcgi_params;
+    fastcgi_pass unix:/var/run/php5-fpm.sock;
+    limit_req_status 444;
+  }
+
+  location ~* /\?s\=|xmlrpc\.php {
+    limit_req   zone=one  burst=1 nodelay;
+    include fastcgi_params;
+    fastcgi_pass unix:/var/run/php5-fpm.sock;
+    limit_req_status 444;
+  }
+
+	location / {
+		try_files $uri $uri/ /index.php?$args;
+	}
+
+	location ~ \.php$ {
+		try_files $uri =404; 
+		include fastcgi_params;
+		fastcgi_pass unix:/var/run/php5-fpm.sock;
+	}
+	
+	location ~* ^.+\.(ogg|ogv|svg|svgz|eot|otf|woff|mp4|ttf|rss|atom|jpg|jpeg|gif|png|ico|zip|tgz|gz|rar|bz2|doc|xls|exe|ppt|tar|mid|midi|wav|bmp|rtf)$ {
+		access_log off;	log_not_found off; expires max;
+	}
+
+	location = /robots.txt { access_log off; log_not_found off; }
+	location ~ /\. { deny  all; access_log off; log_not_found off; }
+}
