@@ -1,4 +1,7 @@
 #WP-Bullet.com WordPress nginx fastcgi caching virtualhost
+#DoS Protetion
+limit_req_zone $binary_remote_addr zone=one:10m rate=1r/s;
+#Fastcgi caching
 fastcgi_cache_path /var/run/nginx-cache levels=1:2 keys_zone=WORDPRESS:100m inactive=60m;
 fastcgi_cache_key "$scheme$request_method$host$request_uri";
 fastcgi_cache_use_stale error timeout invalid_header http_500;
@@ -14,6 +17,21 @@ server {
 	error_log    /var/log/nginx/example.com.error.log;
 	root /var/www/example.com/;
 	index index.php;
+	
+	location = /wp-login.php {
+	limit_req   zone=one  burst=1 nodelay;
+	include fastcgi_params;
+	fastcgi_pass unix:/var/run/php5-fpm.sock;
+	limit_req_status 444;
+	}
+
+	location ~* /\?s\=|xmlrpc\.php {
+	limit_req   zone=one  burst=1 nodelay;
+	include fastcgi_params;
+	fastcgi_pass unix:/var/run/php5-fpm.sock;
+	limit_req_status 444;
+	}
+
 	set $skip_cache 0;
 	# POST requests and urls with a query string should always go to PHP
 	if ($request_method = POST) {
