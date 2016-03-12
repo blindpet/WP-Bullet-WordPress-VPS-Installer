@@ -296,7 +296,7 @@ ins_variable=$(whiptail --ok-button "Choose" --title "WP Bullet VPS Installer fo
 case $ins_variable in
 	"nginx + fastcgi caching") 			install_nginx_fastcgi;;
 	"nginx + Varnish") 					install_nginx_varnish;;
-	"nginx + Varnish + haproxy") 		install_nginx_varnish_haproxy="true";;
+	"nginx + Varnish + haproxy") 		install_nginx_varnish_haproxy;;
 	"Monit") 							install_monit;;
 	"Webmin") 							install_webmin;;
 	"CSF Firewall") 					install_csf;;
