@@ -512,7 +512,7 @@ whiptail --ok-button "Install" --title "WP Bullet VPS Installer for Ubuntu/Debia
 "Redis" "Install Redis Server" off \
 "Memcached" "Install Memcached" off \
 "Monit" "Monitor your programs" off \
-"Create SWAP File" "Creates SWAP on your VPS" off 3>&1 1>&2 2>&3) exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
+"Create SWAP File" "Creates SWAP on your VPS" off 2>results
 while read choice
 do
 case $choice in
