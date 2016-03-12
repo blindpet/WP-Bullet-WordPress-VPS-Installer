@@ -47,7 +47,6 @@ install_nginx
 cp configs/wordpressfastcgi /etc/nginx/sites-available/wordpress
 ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
-cp configs/www.conf /etc/php5/fpm/pool.d/www.conf
 install_mariadb
 install_wordpress
 service nginx restart
@@ -66,7 +65,6 @@ install_nginx
 cp configs/wordpressvarnish /etc/nginx/sites-available/wordpress
 ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
-cp configs/www.conf /etc/php5/fpm/pool.d/www.conf
 install_mariadb
 install_varnish
 cp configs/default.vcl /etc/varnish/default.vcl
@@ -89,7 +87,6 @@ install_nginx
 cp configs/wordpressvarnish /etc/nginx/sites-available/wordpress
 ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
-cp configs/www.conf /etc/php5/fpm/pool.d/www.conf
 install_mariadb
 install_varnish
 cp configs/default.vcl /etc/varnish/default.vcl
@@ -134,7 +131,7 @@ install_wordpress () {
 #--------------------------------------------------------------------------------------------------------------------------------
 
 debconf-apt-progress -- apt-get install curl php5-curl php5-mysql php5-cli php5-fpm php5-gd -y
-
+cp configs/www.conf /etc/php5/fpm/pool.d/www.conf
 mkdir -p /var/www/${WORDPRESSSITE}
 cd /var/www/${WORDPRESSSITE}
 wget http://wordpress.org/latest.tar.gz
