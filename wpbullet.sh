@@ -37,6 +37,25 @@ WORDPRESSSITE=$(whiptail --inputbox "Choose the WordPress sitename" 8 78 "WP-Bul
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 }
 
+install_nginx_fastcgi () {
+#--------------------------------------------------------------------------------------------------------------------------------
+# Install nginx with fastcgi caching
+#--------------------------------------------------------------------------------------------------------------------------------
+get_user_input
+install_dotdeb
+install_nginx
+cp configs/wordpressfastcgi /etc/nginx/sites-available/wordpress
+ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
+sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
+cp configs/www.conf /etc/php5/fpm/pool.d/www.conf
+install_mariadb
+install_wordpress
+service nginx restart
+service php5-fpm restart
+show_credentials
+clear_bash_history
+}
+
 install_nginx_varnish () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Install nginx and Varnish
@@ -47,6 +66,7 @@ install_nginx
 cp configs/wordpressvarnish /etc/nginx/sites-available/wordpress
 ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
+cp configs/www.conf /etc/php5/fpm/pool.d/www.conf
 install_mariadb
 install_varnish
 cp configs/default.vcl /etc/varnish/default.vcl
@@ -66,10 +86,18 @@ install_nginx_varnish_haproxy () {
 get_user_input
 install_dotdeb
 install_nginx
+cp configs/wordpressvarnish /etc/nginx/sites-available/wordpress
+ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
+sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
+cp configs/www.conf /etc/php5/fpm/pool.d/www.conf
 install_mariadb
 install_varnish
+cp configs/default.vcl /etc/varnish/default.vcl
+sed -i s"/Web.Server.IP/${SERVERIP}/" /etc/varnish/default.vcl
 install_wordpress
 install_haproxy
+mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
+cp configs/haproxy.cfg /etc/haproxy/haproxy.cfg
 service nginx restart
 service php5-fpm restart
 service varnish restart
@@ -95,6 +123,7 @@ install_nginx () {
 install_dotdeb
 debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install nginx -y
+cp configs/nginx.conf /etc/nginx/nginx.conf
 unlink /etc/nginx/sites-enabled/default
 service nginx restart
 }
@@ -221,6 +250,7 @@ install_suhosin () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Install suhosin
 #--------------------------------------------------------------------------------------------------------------------------------
+debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install php5-dev git build-essential -y
 cd /tmp
 SUHOSINLATEST=$(wget -q -O - https://github.com/stefanesser/suhosin/releases/ | grep tar.gz | awk -F [\"] 'NR==1 {print $2}')
