@@ -1,4 +1,9 @@
 #!/bin/bash
+#make sure you are root
+if [ $(id -u) != "0" ]; then
+    echo "You must be root to run this script, use root or a sudo user."
+    exit 1
+fi
 
 show_credentials() {
 #--------------------------------------------------------------------------------------------------------------------------------
@@ -497,34 +502,45 @@ SERVERIP=$(ifconfig eth0 | awk -F"[: ]+" '/inet addr:/ {print $4}')
 #--------------------------------------------------------------------------------------------------------------------------------
 
 installer () {
-ins_variable=$(whiptail --ok-button "Choose" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --menu "\nIP:   ${SERVERIP}\n\nChoose what you want to install:" 25 99 12 \
-"nginx + fastcgi caching" "nginx with fastcgi caching        "  \
+whiptail --ok-button "Install" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --checklist --separate-output "\nIP:   ${SERVERIP}\n\nChoose what you want to install:" 25 99 12 \
+"nginx + fastcgi caching" "nginx with fastcgi caching        " off \
 "nginx + Varnish" "nginx with Varnish caching        "  \
-"nginx + Varnish + haproxy" "nginx with Varnish caching SSL termination by haproxy"  \
-"Webmin" "Easy GUI VPS administration"  \
-"CSF Firewall" "Comprehensive Firewall"  \
-"Suhosin" "Enable PHP Security"  \
-"Redis" "Install Redis Server"  \
-"Memcached" "Install Memcached"  \
-"Monit" "Monitor your programs"  \
-"Create SWAP File" "Creates SWAP on your VPS"  3>&1 1>&2 2>&3) exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
-
-
-case $ins_variable in
-	"nginx + fastcgi caching") 		install_nginx_fastcgi;;
-	"nginx + Varnish") 			install_nginx_varnish;;
-	"nginx + Varnish + haproxy") 		install_nginx_varnish_haproxy;;
-	"Webmin") 				install_webmin;;
-	"CSF Firewall") 			install_csf;;
-	"Suhosin") 				install_suhosin;;
-	"Redis") 				install_redis;;
-	"Memcached") 				install_memcached;;
-	"Monit") 				install_monit;;
-	"Create SWAP File") 			install_swap;;
+"nginx + Varnish + haproxy" "nginx with Varnish caching SSL termination by haproxy" off \
+"Webmin" "Easy GUI VPS administration" off \
+"CSF Firewall" "Comprehensive Firewall" off \
+"Suhosin" "Enable PHP Security" off \
+"Redis" "Install Redis Server" off \
+"Memcached" "Install Memcached" off \
+"Monit" "Monitor your programs" off \
+"Create SWAP File" "Creates SWAP on your VPS" off 3>&1 1>&2 2>&3) exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
+while read choice
+do
+case $choice in
+	"nginx + fastcgi caching") 		ins_nginx_fastcgi="true";;
+	"nginx + Varnish") 			ins_nginx_varnish="true";;
+	"nginx + Varnish + haproxy") 		ins_nginx_varnish_haproxy="true";;
+	"Webmin") 				ins_webmin="true";;
+	"CSF Firewall") 			ins_csf="true";;
+	"Suhosin") 				ins_suhosin="true";;
+	"Redis") 				ins_redis="true";;
+	"Memcached") 				ins_memcached="true";;
+	"Monit") 				ins_monit="true";;
+	"Create SWAP File") 			ins_swap="true";;
                 *)
                 ;;
 esac
-		
+
+if [[ "$ins_nginx_fastcgi" == "true" ]]; 		then install_nginx_fastcgi;		fi
+if [[ "$ins_nginx_varnish" == "true" ]]; 		then install_nginx_varnish;		fi
+if [[ "$ins_nginx_varnish_haproxy" == "true" ]]; 	then install_nginx_varnish_haproxy;	fi
+if [[ "$ins_webmin" == "true" ]]; 			then install_webmin;			fi
+if [[ "$ins_csf" == "true" ]]; 				then install_csf;			fi
+if [[ "$ins_suhosin" == "true" ]]; 			then install_pyload;			fi
+if [[ "$ins_redis" == "true" ]]; 			then inssall_redis;			fi
+if [[ "$ins_memcached" == "true" ]]; 			then install_memcached;			fi
+if [[ "$ins_monit" == "true" ]]; 			then install_monit;			fi
+if [[ "$ins_swap" == "true" ]]; 			then install_swap;			fi
+
 }
 
 installer
