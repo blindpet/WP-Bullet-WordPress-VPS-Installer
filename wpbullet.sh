@@ -422,7 +422,7 @@ SERVERIP=$(ifconfig eth0 | awk -F"[: ]+" '/inet addr:/ {print $4}')
 #--------------------------------------------------------------------------------------------------------------------------------
 
 installer () {
-ins_variable=$(whiptail --ok-button "Choose" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --menu "\nIP:   $serverIP\nFQDN: $HOSTNAMEFQDN\n\nChoose what you want to install:" 20 99 9 \
+ins_variable=$(whiptail --ok-button "Choose" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --menu "\nIP:   $serverIP\nFQDN: $HOSTNAMEFQDN\n\nChoose what you want to install:" 30 99 12 \
 "nginx + fastcgi caching" "nginx with fastcgi caching        "  \
 "nginx + Varnish" "nginx with Varnish caching        "  \
 "nginx + Varnish + haproxy" "nginx with Varnish caching SSL termination by haproxy"  \
