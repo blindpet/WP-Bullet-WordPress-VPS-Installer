@@ -501,7 +501,6 @@ SERVERIP=$(ifconfig eth0 | awk -F"[: ]+" '/inet addr:/ {print $4}')
 # MAIN INSTALL
 #--------------------------------------------------------------------------------------------------------------------------------
 
-installer () {
 whiptail --ok-button "Install" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --checklist --separate-output "\nIP:   ${SERVERIP}\n\nChoose what you want to install:" 25 99 12 \
 "nginx + fastcgi caching" "nginx with fastcgi caching        " off \
 "nginx + Varnish" "nginx with Varnish caching        "  \
@@ -540,7 +539,3 @@ if [[ "$ins_redis" == "true" ]]; 			then inssall_redis;			fi
 if [[ "$ins_memcached" == "true" ]]; 			then install_memcached;			fi
 if [[ "$ins_monit" == "true" ]]; 			then install_monit;			fi
 if [[ "$ins_swap" == "true" ]]; 			then install_swap;			fi
-
-}
-
-installer
