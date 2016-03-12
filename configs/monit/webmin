@@ -1,0 +1,4 @@
+check process webmin with pidfile /var/webmin/miniserv.pid
+   start program = "/usr/sbin/service webmin start"
+   stop  program = "/usr/sbin/service webmin stop"
+   if failed host 127.0.0.1 port 10000 type tcpssl then restart
