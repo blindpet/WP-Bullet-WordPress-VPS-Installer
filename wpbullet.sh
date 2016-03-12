@@ -349,7 +349,7 @@ service php5-fpm restart
 
 install_redis () {
 #--------------------------------------------------------------------------------------------------------------------------------
-# Install suhosin
+# Install redis
 #--------------------------------------------------------------------------------------------------------------------------------
 debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install php5-dev build-essential -y
@@ -408,6 +408,81 @@ service php5-fpm restart
 installer
 }
 
+install_memcached () {
+#--------------------------------------------------------------------------------------------------------------------------------
+# Install memcached
+#--------------------------------------------------------------------------------------------------------------------------------
+debconf-apt-progress -- apt-get update
+debconf-apt-progress -- apt-get install libevent-dev php5-dev build-essential -y
+MEMCACHELATEST=$(wget -q http://www.memcached.org -O - | grep tar.gz | awk -F "[\"]" '{print $2}')
+cd /tmp
+wget $MEMCACHELATEST -O memcached.tar.gz
+tar -xf memcached.tar.gz
+cd memcached*
+./configure
+make
+make install
+adduser --system --group --disabled-login memcached --no-create-home --shell /bin/nologin --quiet
+cat > /etc/memcached.conf<<EOF
+# Run memcached as a daemon. This command is implied, and is not needed for the
+# daemon to run. See the README.Debian that comes with this package for more
+# information.
+-d
+# Log memcached's output to /var/log/memcached
+logfile /var/log/memcached.log
+# Be verbose
+# -v
+# Be even more verbose (print client commands as well)
+# -vv
+# Start with a cap of 64 megs of memory. It's reasonable, and the daemon default
+# Note that the daemon will grow to this size, but does not start out holding this much
+# memory
+-m 64
+# Default connection port is 11211
+-p 11211
+# Run the daemon as root. The start-memcached will default to running as root if no
+# -u command is present in this config file
+-u memcached
+# Specify which IP address to listen on. The default is to listen on all IP addresses
+# This parameter is one of the only security measures that memcached has, so make sure
+# it's listening on a firewalled interface.
+-l 127.0.0.1
+# Limit the number of simultaneous incoming connections. The daemon default is 1024
+# -c 1024
+# Lock down all paged memory. Consult with the README and homepage before you do this
+# -k
+EOF
+cp scripts/memcached-init /etc/init.d/memcached
+chmod +x /etc/init.d/memcached
+update-rc.d memcached defaults
+service memcached start
+#build memcached pecl extension
+#build libmemcached first
+debconf-apt-progress -- apt-get install libsasl2-dev git php5-dev pkg-config -y
+cd /tmp
+wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
+tar -xvf libmemcached-1.0.18.tar.gz
+cd libmemcached*
+./configure
+make
+make install
+#build the actual pecl extension
+cd /tmp
+git clone https://github.com/php-memcached-dev/php-memcached
+cd php-memcached
+phpize
+./configure --disable-memcached-sasl
+make
+make install
+PHPINI=($(find / -iname php.ini))
+for ini in "${PHPINI[@]}"
+do
+  echo "extension=memcached.so" >> "${ini}"
+done
+service php5-fpm restart
+installer
+}
+
 #--------------------------------------------------------------------------------------------------------------------------------
 # WELCOME SCREEN
 #--------------------------------------------------------------------------------------------------------------------------------
@@ -422,16 +497,16 @@ SERVERIP=$(ifconfig eth0 | awk -F"[: ]+" '/inet addr:/ {print $4}')
 #--------------------------------------------------------------------------------------------------------------------------------
 
 installer () {
-ins_variable=$(whiptail --ok-button "Choose" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --menu "\nIP:   $serverIP\nFQDN: $HOSTNAMEFQDN\n\nChoose what you want to install:" 30 99 12 \
+ins_variable=$(whiptail --ok-button "Choose" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --menu "\nIP:   ${SERVERIP}\n\nChoose what you want to install:" 25 99 12 \
 "nginx + fastcgi caching" "nginx with fastcgi caching        "  \
 "nginx + Varnish" "nginx with Varnish caching        "  \
 "nginx + Varnish + haproxy" "nginx with Varnish caching SSL termination by haproxy"  \
-"Monit" "Monitor your programs"  \
 "Webmin" "Easy GUI VPS administration"  \
 "CSF Firewall" "Comprehensive Firewall"  \
 "Suhosin" "Enable PHP Security"  \
 "Redis" "Install Redis Server"  \
 "Memcached" "Install Memcached"  \
+"Monit" "Monitor your programs"  \
 "Create SWAP File" "Creates SWAP on your VPS"  3>&1 1>&2 2>&3) exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 
 
@@ -439,12 +514,12 @@ case $ins_variable in
 	"nginx + fastcgi caching") 		install_nginx_fastcgi;;
 	"nginx + Varnish") 			install_nginx_varnish;;
 	"nginx + Varnish + haproxy") 		install_nginx_varnish_haproxy;;
-	"Monit") 				install_monit;;
 	"Webmin") 				install_webmin;;
 	"CSF Firewall") 			install_csf;;
 	"Suhosin") 				install_suhosin;;
 	"Redis") 				install_redis;;
 	"Memcached") 				install_memcached;;
+	"Monit") 				install_monit;;
 	"Create SWAP File") 			install_swap;;
                 *)
                 ;;
