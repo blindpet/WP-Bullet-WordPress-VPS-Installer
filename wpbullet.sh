@@ -93,8 +93,6 @@ cp configs/default.vcl /etc/varnish/default.vcl
 sed -i s"/Web.Server.IP/${SERVERIP}/" /etc/varnish/default.vcl
 install_wordpress
 install_haproxy
-mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
-cp configs/haproxy.cfg /etc/haproxy/haproxy.cfg
 service nginx restart
 service php5-fpm restart
 service varnish restart
@@ -195,8 +193,13 @@ deb http://ppa.launchpad.net/vbernat/haproxy-1.6/ubuntu trusty main
 EOF
 debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install openssl haproxy -y
-#openssl req -new -newkey rsa:2048 -nodes -out wpbullet.pem -keyout wpbullet.pem -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.example.com"
-openssl req -new -newkey rsa:2048 -nodes -out /etc/ssl/wpbullet.pem -keyout /etc/ssl/wpbullet.pem -subj "/CN=localhost"
+mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
+cp configs/haproxy.cfg /etc/haproxy/haproxy.cfg
+#openssl req -new -newkey rsa:2048 -nodes -out /etc/ssl/wpbullet.pem -keyout /etc/ssl/wpbullet.pem -subj "/C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.example.com"
+openssl req -new -newkey rsa:2048 -nodes -out /etc/ssl/wpbullet.pem -keyout /etc/ssl/wpbullet.pem -subj "/C=/ST=/L=/O=Company Name/OU=Org/CN=${WORDPRESSSITE}"
+#WordPress SSL fix
+echo "if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+        \$_SERVER['HTTPS']='on';" >> /var/www/${WORDPRESSSITE}/wp-config.php
 }
 
 install_webmin () {
