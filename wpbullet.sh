@@ -495,7 +495,7 @@ debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install monit openssl -y
 openssl req -new -x509 -days 365 -nodes -out /etc/ssl/monit.pem -keyout /etc/ssl/monit.pem -subj "/C=/ST=/L=/O=Company Name/OU=Org/CN=Monit"
 chmod 0700 /etc/ssl/monit.pem
-mv /etc/monit/monitrc /etc/monit/monitrc.bak
+mv /etc/monitrc /etc/monit/monitrc.bak
 cat > /etc/monitrc<<EOF
 set daemon 60 #check services every 60 seconds
   set logfile /var/log/monit.log
@@ -535,7 +535,7 @@ set daemon 60 #check services every 60 seconds
 #allow modular structure
     include /etc/monit/conf.d/*
 EOF
-chmod 0700 /etc/monit/monitrc
+chmod 0700 /etc/monitrc
 #create array to iterate over
 MONITCHECK=(nginx php5-fpm mysqld varnishd haproxy redis-server memcached lfd sshd)
 #loop through array and copy monit configuration if binary exists
