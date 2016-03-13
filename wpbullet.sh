@@ -428,9 +428,9 @@ cd /tmp
 wget -q $MEMCACHELATEST -O memcached.tar.gz
 tar -xf memcached.tar.gz
 cd memcached*
-./configure
+./configure --prefix=/usr
 make
-make install -m 755
+make install
 adduser --system --group --disabled-login memcached --home /usr/bin/memcached --shell /bin/nologin --quiet
 cat > /etc/memcached.conf<<EOF
 # Run memcached as a daemon. This command is implied, and is not needed for the
