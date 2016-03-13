@@ -5,14 +5,25 @@ if [ $(id -u) != "0" ]; then
     exit 1
 fi
 
-show_credentials() {
+show_summary() {
 #--------------------------------------------------------------------------------------------------------------------------------
-# Show credentials
+# Show summary
 #--------------------------------------------------------------------------------------------------------------------------------
+if ${ins_nginx_fastcgi} || ${ins_nginx_varnish} || ${ins_nginx_varnish_haproxy} == "true"; then
 echo "MySQL root password ${MYSQLROOTPASS}"
 echo "WordPress MySQL username ${WORDPRESSSQLUSER}"
 echo "WordPress MySQL password ${WORDPRESSSQLPASS}"
 echo "WordPress MySQL database ${WORDPRESSSQLDB}"
+fi
+if ${ins_monit} == "true"; then
+echo "Monit is running on https://{$SERVERIP}:2812"
+echo "Monit username is ${MONITUSER}"
+echo "Monit password is ${MONITPASS}"
+fi
+if ${ins_webmin} == "true"; then
+echo "Webmin is running on https://{$SERVERIP}:10000"
+echo "Webmin username is system root or sudo user"
+fi
 }
 
 clear_bash_history() {
@@ -28,6 +39,7 @@ get_user_input () {
 # Get user input for WordPress
 #--------------------------------------------------------------------------------------------------------------------------------
 #generate random passwords http://www.howtogeek.com/howto/30184/10-ways-to-generate-a-random-password-from-the-command-line/
+if ${ins_nginx_fastcgi} || ${ins_nginx_varnish} || ${ins_nginx_varnish_haproxy} == "true"; then
 MYSQLROOTPASS=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
 MYSQLROOTPASS=$(whiptail --inputbox "Choose the MySQL root password" 8 78 $MYSQLROOTPASS --title "$SECTION" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
@@ -40,6 +52,16 @@ WORDPRESSSQLPASS=$(whiptail --inputbox "Choose the WordPress MySQL password" 8 7
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 WORDPRESSSITE=$(whiptail --inputbox "Choose the WordPress sitename" 8 78 "WP-Bullet.com" --title "$SECTION" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
+fi
+#monit credentials
+if ${ins_monit} == "true"; then
+MONITUSER=$(whiptail --inputbox "Choose the Monit username for the WebUI" 8 78 "WP-Bullet" --title "$SECTION" 3>&1 1>&2 2>&3)
+exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
+MONITPASS=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+MONITPASS=$(whiptail --inputbox "Choose the Monit password for the WebUI" 8 78 $MONITPASS --title "$SECTION" 3>&1 1>&2 2>&3)
+exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
+fi
+	
 }
 
 install_nginx_fastcgi () {
@@ -81,8 +103,6 @@ real_ip_header     CF-Connecting-IP;
 EOF
 service nginx restart
 service php5-fpm restart
-show_credentials
-clear_bash_history
 }
 
 install_nginx_varnish () {
@@ -129,8 +149,6 @@ EOF
 service nginx restart
 service php5-fpm restart
 service varnish restart
-show_credentials
-clear_bash_history
 }
 
 install_nginx_varnish_haproxy () {
@@ -182,8 +200,6 @@ service nginx restart
 service php5-fpm restart
 service varnish restart
 service haproxy restart
-show_credentials
-clear_bash_history
 }
 
 install_dotdeb () {
@@ -510,6 +526,7 @@ install_monit () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Install monit
 #--------------------------------------------------------------------------------------------------------------------------------
+get_user_input
 MONITCONFIGSFOLDER=$(find / -iname monit | grep configs)
 debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install monit openssl -y
@@ -529,13 +546,13 @@ set daemon 60 #check services every 60 seconds
 
 #Mail settings
 # set mail-format {
-#     from: monit@$HOST
-#  subject: monit alert --  $EVENT $SERVICE
-#  message: $EVENT Service $SERVICE
-#                Date:        $DATE
-#                Action:      $ACTION
-#                Host:        $HOST
-#                Description: $DESCRIPTION
+#     from: monit@\$HOST
+#  subject: monit alert --  \$EVENT $SERVICE
+#  message: \$EVENT Service \$SERVICE
+#                Date:        \$DATE
+#                Action:      \$ACTION
+#                Host:        \$HOST
+#                Description: \$DESCRIPTION
 #
 #           Your faithful employee,
 #           Monit } 
@@ -550,7 +567,7 @@ set daemon 60 #check services every 60 seconds
     pemfile  /etc/ssl/monit.pem
     allow 0.0.0.0/0.0.0.0 # allow all IPs, can use local subnet too
 #    allow htpcguides.crabdance.com        # allow dynamicdns address to connect
-    allow wp:"bullet"      # require user wp with password bullet
+    allow ${MONITUSER}:"${MONITPASS}"      # require user wp with password bullet
 
 #allow modular structure
     include /etc/monit/conf.d/*
@@ -641,3 +658,6 @@ if [[ "$ins_redis" == "true" ]]; 			then install_redis;			fi
 if [[ "$ins_memcached" == "true" ]]; 			then install_memcached;			fi
 if [[ "$ins_monit" == "true" ]]; 			then install_monit;			fi
 if [[ "$ins_swap" == "true" ]]; 			then install_swap;			fi
+
+show_summary
+clear_bash_history
