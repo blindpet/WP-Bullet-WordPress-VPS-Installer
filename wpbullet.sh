@@ -347,7 +347,7 @@ debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install php5-dev git build-essential -y
 cd /tmp
 SUHOSINLATEST=$(wget -q -O - https://github.com/stefanesser/suhosin/releases/ | grep tar.gz | awk -F [\"] 'NR==1 {print $2}')
-wget https://github.com$SUHOSINLATEST -O suhosin.tar.gz
+wget -q https://github.com$SUHOSINLATEST -O suhosin.tar.gz
 tar -xf suhosin.tar.gz
 cd suhosin*
 phpize > /dev/null
@@ -373,7 +373,8 @@ cd /tmp
 wget http://download.redis.io/redis-stable.tar.gz
 tar xzf redis*
 cd redis*
-make
+echo "Building Redis"
+make > /dev/null
 make install PREFIX=/usr
 mkdir /etc/redis
 cp redis.conf /etc/redis/
@@ -414,9 +415,10 @@ cd /tmp
 debconf-apt-progress -- git -y
 git clone https://github.com/phpredis/phpredis
 cd phpredis
-phpize
-./configure
-make
+echo "Building Redis pecl extension"
+phpize > /dev/null
+./configure > /dev7Null
+make > /dev/null
 make install
 PHPINI=($(find / -iname php.ini))
 for ini in "${PHPINI[@]}"
