@@ -624,8 +624,8 @@ sysctl -p
 
 whiptail --title "Welcome to the WP Bullet WordPress VPS Installer" --msgbox "This Ubuntu and Debian Installer will prompt for credentials and autoconfigure everything" 8 78
 #get ip
-SERVERIP=$(ifconfig eth0 | awk -F"[: ]+" '/inet addr:/ {print $4}')
-ASKED="false"
+#SERVERIP=$(ifconfig eth0 | awk -F"[: ]+" '/inet addr:/ {print $4}')
+SERVERIP=$(wget http://ipinfo.io/ip -qO -)
 #--------------------------------------------------------------------------------------------------------------------------------
 # MAIN INSTALL
 #--------------------------------------------------------------------------------------------------------------------------------
