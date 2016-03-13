@@ -595,9 +595,11 @@ install_wp () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Install wp
 #--------------------------------------------------------------------------------------------------------------------------------
-
+#run commands inside WORDPRESSITE directory e.g. wp plugin install wordpress-seo --activate --allow-root
 wget -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar /usr/bin/wp
 chmod 755 /usr/bin/wp
+PHPCLI=$(find / -iname php.ini | grep cli)
+echo "suhosin.executor.include.whitelist="phar" >> $PHPCLI
 }
 
 install_swap () {
