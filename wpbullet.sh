@@ -480,7 +480,7 @@ cd /tmp
 git clone https://github.com/php-memcached-dev/php-memcached
 cd php-memcached
 phpize
-./configure --disable-memcached-sasl
+./configure --prefix=/usr --disable-memcached-sasl
 make
 make install
 PHPINI=($(find / -iname php.ini))
