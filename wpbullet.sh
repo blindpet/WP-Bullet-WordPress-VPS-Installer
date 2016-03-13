@@ -430,7 +430,7 @@ tar -xf memcached.tar.gz
 cd memcached*
 ./configure
 make
-make install
+make install -m 755
 adduser --system --group --disabled-login memcached --home /usr/bin/memcached --shell /bin/nologin --quiet
 cat > /etc/memcached.conf<<EOF
 # Run memcached as a daemon. This command is implied, and is not needed for the
@@ -467,7 +467,7 @@ update-rc.d memcached defaults
 service memcached start
 #build memcached pecl extension
 #build libmemcached first
-debconf-apt-progress -- apt-get install libsasl2-dev git php5-dev pkg-config -y
+debconf-apt-progress -- apt-get install libsasl2-dev git php5-dev pkg-config build-essential -y
 cd /tmp
 wget -q https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
 tar -xf libmemcached-1.0.18.tar.gz
