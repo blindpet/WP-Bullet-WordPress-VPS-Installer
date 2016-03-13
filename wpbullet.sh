@@ -9,13 +9,13 @@ show_summary() {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Show summary
 #--------------------------------------------------------------------------------------------------------------------------------
-if (${ins_nginx_fastcgi} || "${ins_nginx_varnish} || ${ins_nginx_varnish_haproxy} == "true";) then
+if (${ins_nginx_fastcgi} || ${ins_nginx_varnish} || ${ins_nginx_varnish_haproxy} == "true";) then
 echo "MySQL root password ${MYSQLROOTPASS}"
 echo "WordPress MySQL username ${WORDPRESSSQLUSER}"
 echo "WordPress MySQL password ${WORDPRESSSQLPASS}"
 echo "WordPress MySQL database ${WORDPRESSSQLDB}"
 fi
-if "$ins_monit" == "true"; then
+if [ "${ins_monit}" == "true" ]; then
 echo "Monit is running on https://$SERVERIP:2812"
 echo "Monit username is ${MONITUSER}"
 echo "Monit password is ${MONITPASS}"
