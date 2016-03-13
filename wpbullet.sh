@@ -375,7 +375,7 @@ tar xzf redis*
 cd redis*
 echo "Building Redis"
 make > /dev/null
-make install PREFIX=/usr
+make install PREFIX=/usr > /dev/null
 mkdir /etc/redis
 cp redis.conf /etc/redis/
 cd ..
