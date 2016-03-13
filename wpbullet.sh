@@ -599,6 +599,7 @@ install_wp () {
 wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -O /usr/bin/wp
 chmod 755 /usr/bin/wp
 PHPCLI=$(find / -iname php.ini | grep cli)
+#grep suhosin.executor.include.whitelist
 echo 'suhosin.executor.include.whitelist="phar"' >> $PHPCLI
 }
 
