@@ -245,6 +245,9 @@ debconf-apt-progress -- apt-get install debconf -y
 echo "mariadb-server-10.0 mysql-server/root_password password ${MYSQLROOTPASS}" | debconf-set-selections
 echo "mariadb-server-10.0 mysql-server/root_password_again password ${MYSQLROOTPASS}" | debconf-set-selections
 debconf-apt-progress -- apt-get -y install mariadb-server mariadb-client
+mv /etc/mysql/my.conf /etc/mysql/my.conf.bak
+cp configs/my.conf /etc/mysql/my.conf
+service mysql restart
 }
 
 install_varnish (){
@@ -291,8 +294,8 @@ install_webmin () {
 # Install webmin
 #--------------------------------------------------------------------------------------------------------------------------------
 #install csf with webmin module
-sudo apt-get update
-sudo apt-get install libauthen-pam-perl libio-pty-perl libnet-ssleay-perl libapt-pkg-perl apt-show-versions libwww-perl -y
+debconf-apt-progress -- apt-get update
+debconf-apt-progress -- apt-get install libauthen-pam-perl libio-pty-perl libnet-ssleay-perl libapt-pkg-perl apt-show-versions libwww-perl -y
 cd /tmp
 wget http://www.webmin.com/download/deb/webmin-current.deb
 dpkg -i webmin*
@@ -303,12 +306,17 @@ install_csf () {
 # Install csf
 #--------------------------------------------------------------------------------------------------------------------------------
 #install csf
-apt-get install iptables unzip -y
+debconf-apt-progress -- apt-get remove ufw -y
+debconf-apt-progress -- apt-get install iptables unzip -y
 cd /tmp
 wget -q https://download.configserver.com/csf.tgz
 tar -xf csf.tgz -C /opt
 cd /opt/csf
 bash /opt/csf/install.sh
+#copy template over
+CONFIGSFOLDER=$(find / -iname monit | grep configs)
+mv /etc/csf/csf.conf /etc/csf/csf.conf.bak
+cp $CONFIGSFOLDER/csf.conf /etc/csf/csf.conf
 #install csf webmin module
 cd /usr/share/webmin
 perl install-module.pl /etc/csf/csfwebmin.tgz
@@ -557,6 +565,10 @@ done
 #hashing webmin doesn't work so check for the pid file instead
 if (find /var/run -iname miniserv.pid > /dev/null); then
 cp $MONITCONFIGSFOLDER/webmin /etc/monit/conf.d/webmin
+fi
+#make sure nginx is listening on the right port
+if !(lsof | grep LISTEN | grep 8080 >/dev/null); then
+sed 's/8080/80/' /etc/monit/conf.d/nginx
 fi
 service monit restart
 }
