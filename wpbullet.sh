@@ -20,7 +20,7 @@ echo "Monit is running on https://$SERVERIP:2812"
 echo "Monit username is ${MONITUSER}"
 echo "Monit password is ${MONITPASS}"
 fi
-if ${ins_webmin} == "true"; then
+if $ins_webmin == "true"; then
 echo "Webmin is running on https://$SERVERIP:10000"
 echo "Webmin username is system root or sudo user"
 fi
