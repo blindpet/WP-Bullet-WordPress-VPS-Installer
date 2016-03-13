@@ -317,7 +317,7 @@ bash /opt/csf/install.sh
 CSFTEMPLATE=$(find / -iname csf.conf | grep configs)
 mv /etc/csf/csf.conf /etc/csf/csf.conf.bak
 cp $CSFTEMPLATE /etc/csf/csf.conf
-csf -r
+csf -r > /dev/null
 #install csf webmin module
 cd /usr/share/webmin
 perl install-module.pl /etc/csf/csfwebmin.tgz
@@ -350,10 +350,10 @@ SUHOSINLATEST=$(wget -q -O - https://github.com/stefanesser/suhosin/releases/ | 
 wget https://github.com$SUHOSINLATEST -O suhosin.tar.gz
 tar -xf suhosin.tar.gz
 cd suhosin*
-phpize
-./configure
-make
-make install
+phpize > /dev/null
+./configure > /dev/null
+make > /dev/null
+make install > /dev/null
 PHPINI=($(find / -iname php.ini))
 for ini in "${PHPINI[@]}"
 do
