@@ -422,7 +422,7 @@ install_memcached () {
 # Install memcached
 #--------------------------------------------------------------------------------------------------------------------------------
 debconf-apt-progress -- apt-get update
-debconf-apt-progress -- apt-get install libevent-dev php5-dev build-essential -y
+debconf-apt-progress -- apt-get install libanyevent-perl libyaml-perl libterm-readkey-perl libevent-dev php5-dev build-essential -y
 MEMCACHELATEST=$(wget -q http://www.memcached.org -O - | grep tar.gz | awk -F "[\"]" '{print $2}')
 cd /tmp
 wget -q $MEMCACHELATEST -O memcached.tar.gz
@@ -431,7 +431,7 @@ cd memcached*
 ./configure
 make
 make install
-aadduser --system --group --disabled-login memcached --home /usr/bin/memcached --shell /bin/nologin --quiet
+adduser --system --group --disabled-login memcached --home /usr/bin/memcached --shell /bin/nologin --quiet
 cat > /etc/memcached.conf<<EOF
 # Run memcached as a daemon. This command is implied, and is not needed for the
 # daemon to run. See the README.Debian that comes with this package for more
