@@ -105,7 +105,7 @@ real_ip_header     CF-Connecting-IP;
 EOF
 service nginx restart
 service php5-fpm restart
-ins_nginx_fastcgi="false"
+${ins_nginx_fastcgi}="false"
 }
 
 install_nginx_varnish () {
