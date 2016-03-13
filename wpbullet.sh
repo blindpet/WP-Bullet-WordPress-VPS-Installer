@@ -38,7 +38,7 @@ get_user_input () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Get user input for WordPress
 #--------------------------------------------------------------------------------------------------------------------------------
-if !({$ASKED}=="true";) then
+if !($ASKED=="true";) then
 #generate random passwords http://www.howtogeek.com/howto/30184/10-ways-to-generate-a-random-password-from-the-command-line/
 if (${ins_nginx_fastcgi} || ${ins_nginx_varnish} || ${ins_nginx_varnish_haproxy} == "true";) then
 MYSQLROOTPASS=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
@@ -63,7 +63,7 @@ MONITPASS=$(whiptail --inputbox "Choose the Monit password for the WebUI" 8 78 $
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 fi
 fi
-${ASKED}="true"
+ASKED="true"
 }
 
 install_nginx_fastcgi () {
