@@ -38,7 +38,7 @@ get_user_input () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Get user input for WordPress
 #--------------------------------------------------------------------------------------------------------------------------------
-if (("$ASKED" != "true")); then
+#if (("$ASKED" != "true")); then
 #generate random passwords http://www.howtogeek.com/howto/30184/10-ways-to-generate-a-random-password-from-the-command-line/
 if (${ins_nginx_fastcgi} || ${ins_nginx_varnish} || ${ins_nginx_varnish_haproxy} == "true";) then
 MYSQLROOTPASS=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
@@ -54,16 +54,8 @@ exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 WORDPRESSSITE=$(whiptail --inputbox "Choose the WordPress sitename" 8 78 "WP-Bullet.com" --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 fi
-#monit credentials
-if (${ins_monit} == "true";) then
-MONITUSER=$(whiptail --inputbox "Choose the Monit username for the WebUI" 8 78 "WP-Bullet" --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
-exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
-MONITPASS=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
-MONITPASS=$(whiptail --inputbox "Choose the Monit password for the WebUI" 8 78 $MONITPASS --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
-exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
-fi
-fi
-ASKED="true"
+#fi
+#ASKED="true"
 }
 
 install_nginx_fastcgi () {
@@ -529,7 +521,12 @@ install_monit () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Install monit
 #--------------------------------------------------------------------------------------------------------------------------------
-get_user_input
+#monit credentials
+MONITUSER=$(whiptail --inputbox "Choose the Monit username for the WebUI" 8 78 "WP-Bullet" --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
+exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
+MONITPASS=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+MONITPASS=$(whiptail --inputbox "Choose the Monit password for the WebUI" 8 78 $MONITPASS --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
+exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 MONITCONFIGSFOLDER=$(find / -iname monit | grep configs)
 debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install monit openssl -y
