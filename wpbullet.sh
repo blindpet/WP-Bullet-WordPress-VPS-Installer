@@ -9,18 +9,18 @@ show_summary() {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Show summary
 #--------------------------------------------------------------------------------------------------------------------------------
-if ${ins_nginx_fastcgi} || ${ins_nginx_varnish} || ${ins_nginx_varnish_haproxy} == "true"; then
+if (${ins_nginx_fastcgi} || ${ins_nginx_varnish} || ${ins_nginx_varnish_haproxy} == "true";) then
 echo "MySQL root password ${MYSQLROOTPASS}"
 echo "WordPress MySQL username ${WORDPRESSSQLUSER}"
 echo "WordPress MySQL password ${WORDPRESSSQLPASS}"
 echo "WordPress MySQL database ${WORDPRESSSQLDB}"
 fi
-if ${ins_monit} == "true"; then
+if (${ins_monit} == "true";) then
 echo "Monit is running on https://{$SERVERIP}:2812"
 echo "Monit username is ${MONITUSER}"
 echo "Monit password is ${MONITPASS}"
 fi
-if ${ins_webmin} == "true"; then
+if (${ins_webmin} == "true";) then
 echo "Webmin is running on https://{$SERVERIP}:10000"
 echo "Webmin username is system root or sudo user"
 fi
@@ -38,30 +38,32 @@ get_user_input () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Get user input for WordPress
 #--------------------------------------------------------------------------------------------------------------------------------
+if !($ASKED=="true";) then
 #generate random passwords http://www.howtogeek.com/howto/30184/10-ways-to-generate-a-random-password-from-the-command-line/
-if ${ins_nginx_fastcgi} || ${ins_nginx_varnish} || ${ins_nginx_varnish_haproxy} == "true"; then
+if (${ins_nginx_fastcgi} || ${ins_nginx_varnish} || ${ins_nginx_varnish_haproxy} == "true";) then
 MYSQLROOTPASS=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
-MYSQLROOTPASS=$(whiptail --inputbox "Choose the MySQL root password" 8 78 $MYSQLROOTPASS --title "$SECTION" 3>&1 1>&2 2>&3)
+MYSQLROOTPASS=$(whiptail --inputbox "Choose the MySQL root password" 8 78 $MYSQLROOTPASS --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
-WORDPRESSSQLDB=$(whiptail --inputbox "Choose the WordPress MySQL database name" 8 78 "WordPressDB" --title "$SECTION" 3>&1 1>&2 2>&3)
+WORDPRESSSQLDB=$(whiptail --inputbox "Choose the WordPress MySQL database name" 8 78 "WordPressDB" --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
-WORDPRESSSQLUSER=$(whiptail --inputbox "Choose the WordPress MySQL user" 8 78 "WordPressMySQLuser" --title "$SECTION" 3>&1 1>&2 2>&3)
+WORDPRESSSQLUSER=$(whiptail --inputbox "Choose the WordPress MySQL user" 8 78 "WordPressMySQLuser" --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 WORDPRESSSQLPASS=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
-WORDPRESSSQLPASS=$(whiptail --inputbox "Choose the WordPress MySQL password" 8 78 $WORDPRESSSQLPASS --title "$SECTION" 3>&1 1>&2 2>&3)
+WORDPRESSSQLPASS=$(whiptail --inputbox "Choose the WordPress MySQL password" 8 78 $WORDPRESSSQLPASS --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
-WORDPRESSSITE=$(whiptail --inputbox "Choose the WordPress sitename" 8 78 "WP-Bullet.com" --title "$SECTION" 3>&1 1>&2 2>&3)
+WORDPRESSSITE=$(whiptail --inputbox "Choose the WordPress sitename" 8 78 "WP-Bullet.com" --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 fi
 #monit credentials
-if ${ins_monit} == "true"; then
-MONITUSER=$(whiptail --inputbox "Choose the Monit username for the WebUI" 8 78 "WP-Bullet" --title "$SECTION" 3>&1 1>&2 2>&3)
+if (${ins_monit} == "true";) then
+MONITUSER=$(whiptail --inputbox "Choose the Monit username for the WebUI" 8 78 "WP-Bullet" --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 MONITPASS=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
-MONITPASS=$(whiptail --inputbox "Choose the Monit password for the WebUI" 8 78 $MONITPASS --title "$SECTION" 3>&1 1>&2 2>&3)
+MONITPASS=$(whiptail --inputbox "Choose the Monit password for the WebUI" 8 78 $MONITPASS --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 fi
-	
+fi
+ASKED="true"
 }
 
 install_nginx_fastcgi () {
@@ -103,6 +105,7 @@ real_ip_header     CF-Connecting-IP;
 EOF
 service nginx restart
 service php5-fpm restart
+#ins_nginx_fastcgi="false"
 }
 
 install_nginx_varnish () {
@@ -149,6 +152,7 @@ EOF
 service nginx restart
 service php5-fpm restart
 service varnish restart
+#ins_nginx_varnish="false"
 }
 
 install_nginx_varnish_haproxy () {
