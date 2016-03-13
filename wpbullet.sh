@@ -15,7 +15,7 @@ echo "WordPress MySQL username ${WORDPRESSSQLUSER}"
 echo "WordPress MySQL password ${WORDPRESSSQLPASS}"
 echo "WordPress MySQL database ${WORDPRESSSQLDB}"
 fi
-if [ "${ins_monit}" == "true" ]; then
+if "$ins_monit" == "true"; then
 echo "Monit is running on https://$SERVERIP:2812"
 echo "Monit username is ${MONITUSER}"
 echo "Monit password is ${MONITPASS}"
