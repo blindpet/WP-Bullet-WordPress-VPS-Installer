@@ -462,6 +462,10 @@ logfile /var/log/memcached.log
 # -k
 EOF
 cp scripts/memcached-init /etc/init.d/memcached
+cat > /etc/default/memcached<<EOF
+# Set this to no to disable memcached.
+ENABLE_MEMCACHED=yes
+EOF
 chmod +x /etc/init.d/memcached
 update-rc.d memcached defaults
 service memcached start
