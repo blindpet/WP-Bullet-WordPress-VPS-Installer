@@ -422,7 +422,7 @@ install_memcached () {
 # Install memcached
 #--------------------------------------------------------------------------------------------------------------------------------
 debconf-apt-progress -- apt-get update
-debconf-apt-progress -- apt-get install libanyevent-perl libyaml-perl libterm-readkey-perl libevent-dev php5-dev build-essential -y
+debconf-apt-progress -- apt-get install libmemcached* memcached libanyevent-perl libyaml-perl libterm-readkey-perl libevent-dev php5-dev build-essential -y
 MEMCACHELATEST=$(wget -q http://www.memcached.org -O - | grep tar.gz | awk -F "[\"]" '{print $2}')
 cd /tmp
 wget -q $MEMCACHELATEST -O memcached.tar.gz
@@ -431,7 +431,7 @@ cd memcached*
 ./configure --prefix=/usr
 make
 make install
-adduser --system --group --disabled-login memcached --home /usr/bin/memcached --shell /bin/nologin --quiet
+#adduser --system --group --disabled-login memcache --home /usr/bin/memcached --shell /bin/nologin --quiet
 cat > /etc/memcached.conf<<EOF
 # Run memcached as a daemon. This command is implied, and is not needed for the
 # daemon to run. See the README.Debian that comes with this package for more
@@ -451,7 +451,7 @@ logfile /var/log/memcached.log
 -p 11211
 # Run the daemon as root. The start-memcached will default to running as root if no
 # -u command is present in this config file
--u memcached
+-u memcache
 # Specify which IP address to listen on. The default is to listen on all IP addresses
 # This parameter is one of the only security measures that memcached has, so make sure
 # it's listening on a firewalled interface.
@@ -471,14 +471,14 @@ update-rc.d memcached defaults
 service memcached start
 #build memcached pecl extension
 #build libmemcached first
-debconf-apt-progress -- apt-get install libsasl2-dev git php5-dev pkg-config build-essential -y
-cd /tmp
-wget -q https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
-tar -xf libmemcached-1.0.18.tar.gz
-cd libmemcached*
-./configure
-make
-make install
+#debconf-apt-progress -- apt-get install libsasl2-dev git php5-dev pkg-config build-essential -y
+#cd /tmp
+#wget -q https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz
+#tar -xf libmemcached-1.0.18.tar.gz
+#cd libmemcached*
+#./configure
+#make
+#make install
 #build the actual pecl extension
 cd /tmp
 git clone https://github.com/php-memcached-dev/php-memcached
