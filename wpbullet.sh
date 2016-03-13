@@ -216,16 +216,14 @@ debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install nginx -y
 cp configs/nginx.conf /etc/nginx/nginx.conf
 unlink /etc/nginx/sites-enabled/default
-service nginx restart
+debconf-apt-progress -- apt-get install curl php5-curl php5-mysql php5-cli php5-fpm php5-gd -y
+cp configs/www.conf /etc/php5/fpm/pool.d/www.conf
 }
 
 install_wordpress () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Install wordpress
 #--------------------------------------------------------------------------------------------------------------------------------
-
-debconf-apt-progress -- apt-get install curl php5-curl php5-mysql php5-cli php5-fpm php5-gd -y
-cp configs/www.conf /etc/php5/fpm/pool.d/www.conf
 mkdir -p /var/www/${WORDPRESSSITE}
 cd /var/www/${WORDPRESSSITE}
 wget http://wordpress.org/latest.tar.gz
@@ -428,7 +426,7 @@ git clone https://github.com/phpredis/phpredis
 cd phpredis
 echo "Building Redis pecl extension"
 phpize > /dev/null
-./configure > /dev7Null
+./configure > /dev/null
 make > /dev/null
 make install
 PHPINI=($(find / -iname php.ini))
@@ -593,6 +591,15 @@ fi
 service monit restart
 }
 
+install_wp () {
+#--------------------------------------------------------------------------------------------------------------------------------
+# Install wp
+#--------------------------------------------------------------------------------------------------------------------------------
+
+wget -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar /usr/bin/wp
+chmod 755 /usr/bin/wp
+}
+
 install_swap () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Install swap
@@ -630,6 +637,7 @@ whiptail --ok-button "Install" --title "WP Bullet VPS Installer for Ubuntu/Debia
 "Redis" "Install Redis Server" off \
 "Memcached" "Install Memcached" off \
 "Monit" "Monitor your programs" off \
+"wp-cli" "WordPress command line" off \
 "Create SWAP File" "Creates SWAP on your VPS" off 2>results
 while read choice
 do
@@ -643,6 +651,7 @@ case $choice in
 	"Redis") 				ins_redis="true";;
 	"Memcached") 				ins_memcached="true";;
 	"Monit") 				ins_monit="true";;
+	"wp-cli") 				ins_wp="true";;
 	"Create SWAP File") 			ins_swap="true";;
                 *)
                 ;;
@@ -657,6 +666,7 @@ if [[ "$ins_suhosin" == "true" ]]; 			then install_suhosin;			fi
 if [[ "$ins_redis" == "true" ]]; 			then install_redis;			fi
 if [[ "$ins_memcached" == "true" ]]; 			then install_memcached;			fi
 if [[ "$ins_monit" == "true" ]]; 			then install_monit;			fi
+if [[ "$ins_wp" == "true" ]]; 				then install_wp;			fi
 if [[ "$ins_swap" == "true" ]]; 			then install_swap;			fi
 
 show_summary
