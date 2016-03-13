@@ -314,9 +314,10 @@ tar -xf csf.tgz -C /opt
 cd /opt/csf
 bash /opt/csf/install.sh
 #copy template over
-CONFIGSFOLDER=$(find / -iname monit | grep configs)
+CSFTEMPLATE=$(find / -iname csf.conf | grep configs)
 mv /etc/csf/csf.conf /etc/csf/csf.conf.bak
-cp $CONFIGSFOLDER/csf.conf /etc/csf/csf.conf
+cp $CSFTEMPLATE /etc/csf/csf.conf
+csf -r
 #install csf webmin module
 cd /usr/share/webmin
 perl install-module.pl /etc/csf/csfwebmin.tgz
@@ -568,7 +569,7 @@ cp $MONITCONFIGSFOLDER/webmin /etc/monit/conf.d/webmin
 fi
 #make sure nginx is listening on the right port
 if !(lsof | grep LISTEN | grep 8080 >/dev/null); then
-sed 's/8080/80/' /etc/monit/conf.d/nginx
+sed -i 's/8080/80/' /etc/monit/conf.d/nginx
 fi
 service monit restart
 }
