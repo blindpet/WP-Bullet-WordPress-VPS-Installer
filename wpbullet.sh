@@ -63,9 +63,61 @@ install_nginx_fastcgi () {
 # Install nginx with fastcgi caching
 #--------------------------------------------------------------------------------------------------------------------------------
 get_user_input
+#nginxssl=$(whiptail --ok-button "Choose" --title "fastcgi nginx security choice (c) WP-Bullet.com" --menu "\nChoose basic http or https:" 20 78 9 \
+#"fastcgi http" "fastcgi http only        "  \
+#"fastcgi https" "fastcgi https only        " 3>&1 1>&2 2>&3) exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
+#if [ "$nginxssl" == "fastcgi https" ]; then
+#install_nginx_fastcgissl
+#fi
 install_dotdeb
 install_nginx
 cp configs/wordpressfastcgi /etc/nginx/sites-available/wordpress
+ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
+sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
+install_mariadb
+install_wordpress
+#Fix CloudFlare IP
+cat > /etc/nginx/conf.d/cloudflare.conf<<EOF
+#CloudFlare
+set_real_ip_from   199.27.128.0/21;
+set_real_ip_from   173.245.48.0/20;
+set_real_ip_from   103.21.244.0/22;
+set_real_ip_from   103.22.200.0/22;
+set_real_ip_from   103.31.4.0/22;
+set_real_ip_from   141.101.64.0/18;
+set_real_ip_from   108.162.192.0/18;
+set_real_ip_from   190.93.240.0/20;
+set_real_ip_from   188.114.96.0/20;
+set_real_ip_from   197.234.240.0/22;
+set_real_ip_from   198.41.128.0/17;
+set_real_ip_from   162.158.0.0/15;
+set_real_ip_from   104.16.0.0/12;
+set_real_ip_from   172.64.0.0/13;
+set_real_ip_from   2400:cb00::/32;
+set_real_ip_from   2606:4700::/32;
+set_real_ip_from   2803:f800::/32;
+set_real_ip_from   2405:b500::/32;
+set_real_ip_from   2405:8100::/32;
+#Set the real ip header
+real_ip_header     CF-Connecting-IP;
+EOF
+service nginx restart
+service php5-fpm restart
+
+}
+
+install_nginx_fastcgissl () {
+#--------------------------------------------------------------------------------------------------------------------------------
+# Install nginx with fastcgi caching ssl
+#--------------------------------------------------------------------------------------------------------------------------------
+#generate ssl
+debconf-apt-progress -- apt-get update
+debconf-apt-progress -- apt-get install openssl -y
+mkdir -p /etc/nginx/ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/C=/ST=/L=/O=Company Name/OU=Org/CN=${WORDPRESSSITE}"
+install_dotdeb
+install_nginx
+cp configs/wordpressfastcgissl /etc/nginx/sites-available/wordpress
 ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
 install_mariadb
@@ -631,10 +683,10 @@ SERVERIP=$(wget http://ipinfo.io/ip -qO -)
 # MAIN INSTALL
 #--------------------------------------------------------------------------------------------------------------------------------
 
-whiptail --ok-button "Install" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --checklist --separate-output "\nIP:   ${SERVERIP}\n\nChoose what you want to install:" 25 99 12 \
+whiptail --ok-button "Install" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --checklist --separate-output "\nIP:   ${SERVERIP}\n\nChoose what you want to install:" 25 78 12 \
 "nginx + fastcgi caching" "nginx with fastcgi caching        " off \
 "nginx + Varnish" "nginx with Varnish caching        " off \
-"nginx + Varnish + haproxy" "nginx with Varnish caching SSL termination by haproxy" off \
+"nginx + Varnish + haproxy" "nginx + Varnish caching + haproxy SSL termination" off \
 "Webmin" "Easy GUI VPS administration" off \
 "CSF Firewall" "Comprehensive Firewall" off \
 "Suhosin" "Enable PHP Security" off \
@@ -647,6 +699,7 @@ while read choice
 do
 case $choice in
 	"nginx + fastcgi caching") 		ins_nginx_fastcgi="true";;
+	"nginx + fastcgi caching ssl") 		ins_nginx_fastcgissl="true";;
 	"nginx + Varnish") 			ins_nginx_varnish="true";;
 	"nginx + Varnish + haproxy") 		ins_nginx_varnish_haproxy="true";;
 	"Webmin") 				ins_webmin="true";;
@@ -662,6 +715,7 @@ case $choice in
 	esac
 done < results
 if [[ "$ins_nginx_fastcgi" == "true" ]]; 		then install_nginx_fastcgi;		fi
+if [[ "$ins_nginx_fastcgissl" == "true" ]]; 		then install_nginx_fastcgissl;		fi
 if [[ "$ins_nginx_varnish" == "true" ]]; 		then install_nginx_varnish;		fi
 if [[ "$ins_nginx_varnish_haproxy" == "true" ]]; 	then install_nginx_varnish_haproxy;	fi
 if [[ "$ins_webmin" == "true" ]]; 			then install_webmin;			fi
