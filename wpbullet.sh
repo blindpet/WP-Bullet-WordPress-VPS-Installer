@@ -685,8 +685,9 @@ SERVERIP=$(wget http://ipinfo.io/ip -qO -)
 
 whiptail --ok-button "Install" --title "WP Bullet VPS Installer for Ubuntu/Debian (c) WP-Bullet.com" --checklist --separate-output "\nIP:   ${SERVERIP}\n\nChoose what you want to install:" 25 78 12 \
 "nginx + fastcgi caching" "nginx with fastcgi caching        " off \
+"nginx + fastcgi caching ssl" "nginx ssl with fastcgi caching        " off \
 "nginx + Varnish" "nginx with Varnish caching        " off \
-"nginx + Varnish + haproxy" "nginx + Varnish caching + haproxy SSL termination" off \
+"nginx + Varnish + haproxy" "nginx + Varnish caching + haproxy SSL" off \
 "Webmin" "Easy GUI VPS administration" off \
 "CSF Firewall" "Comprehensive Firewall" off \
 "Suhosin" "Enable PHP Security" off \
