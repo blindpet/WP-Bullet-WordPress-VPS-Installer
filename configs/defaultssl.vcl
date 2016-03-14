@@ -23,16 +23,17 @@ acl purge {
 # ##########################################################
 sub vcl_recv {
 
-# set realIP by trimming CloudFlare IP which will be used for various checks
+# set real IP by trimming CloudFlare IP which will be used for various checks
 set req.http.X-Actual-IP = regsub(req.http.X-Forwarded-For, "[, ].*$", ""); 
 
-if (client.ip != "127.0.0.1" && std.port(server.ip) == 443 && req.http.host ~ "^(?i)192.168.60.138") {
+#Fix SSL redirects
+if (client.ip != "127.0.0.1" && std.port(server.ip) == 443 && req.http.host ~ "^(?i)DOMAIN") {
         set req.http.x-redir = "http://" + req.http.host + req.url;
         return(synth(850, "Moved permanently"));
     }
 
 
-        # FORWARD THE IP OF THE REQUEST
+ # FORWARD THE IP OF THE REQUEST
   if (req.restarts == 0) {
     if (req.http.x-forwarded-for) {
       set req.http.X-Forwarded-For =
@@ -173,6 +174,8 @@ sub vcl_miss {
   return (fetch);
 }
 
+# MISS FUNCTION
+# ##########################################################
 sub vcl_synth {
     if (resp.status == 850) {
         set resp.http.Location = req.http.x-redir;
