@@ -217,13 +217,13 @@ ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
 install_mariadb
 install_varnish
-cp configs/default.vcl /etc/varnish/default.vcl
+cp configs/default.vcl /etc/varnish/defaultssl.vcl
 sed -i s"/Web.Server.IP/${SERVERIP}/" /etc/varnish/default.vcl
 install_haproxy
 install_wordpress
-#WordPress SSL fix
-echo "if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
-        \$_SERVER['HTTPS']='on';" >> /var/www/${WORDPRESSSITE}/wp-config.php
+#WordPress SSL fix now use different vcl
+#echo "if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+#        \$_SERVER['HTTPS']='on';" >> /var/www/${WORDPRESSSITE}/wp-config.php
 #Fix CloudFlare IP
 cat > /etc/nginx/conf.d/cloudflare.conf<<EOF
 #CloudFlare
