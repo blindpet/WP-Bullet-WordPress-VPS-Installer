@@ -110,6 +110,7 @@ install_nginx_fastcgissl () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Install nginx with fastcgi caching ssl
 #--------------------------------------------------------------------------------------------------------------------------------
+get_user_input
 #generate ssl
 debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install openssl -y
