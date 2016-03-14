@@ -217,8 +217,9 @@ ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
 install_mariadb
 install_varnish
-cp configs/default.vcl /etc/varnish/defaultssl.vcl
+cp configs/defaultssl.vcl /etc/varnish/default.vcl
 sed -i s"/Web.Server.IP/${SERVERIP}/" /etc/varnish/default.vcl
+sed -i s"/DOMAIN/${WORDPRESSSITE}/" /etc/varnish/default.vcl
 install_haproxy
 install_wordpress
 #WordPress SSL fix now use different vcl
