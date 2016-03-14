@@ -12,19 +12,19 @@ add_header WP-Bullet-Fastcgi-Cache $upstream_cache_status;
 #ssl based on https://cipherli.st/
 
 server {
-  listen 80;
-  server_name example.com www.example.com;
-  return 301 https://$server_name$request_uri;  # enforce https
-}
+	listen 80;
+	server_name example.com www.example.com;
+	return 301 https://$server_name$request_uri;  # enforce https
+	}
 
 server {
-  listen 443;
-  ssl on;
-  ssl_certificate /etc/nginx/ssl/nginx.crt;
+	listen 443;
+	ssl on;
+	ssl_certificate /etc/nginx/ssl/nginx.crt;
 	ssl_certificate_key /etc/nginx/ssl/nginx.key;
-  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-  ssl_prefer_server_ciphers on;
-  ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+	ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+	ssl_prefer_server_ciphers on;
+	ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
 	server_name example.com www.example.com;
 	access_log   /var/log/nginx/example.com.access.log;
 	error_log    /var/log/nginx/example.com.error.log;
