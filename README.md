@@ -2,6 +2,7 @@
 The provisioning tool for preconfiguring a VPS for WordPress
 
 To use
+
     sudo apt-get install git -y
     cd ~
     git clone https://github.com/wpbullet/WordPress-VPS-Installer
