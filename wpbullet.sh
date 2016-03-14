@@ -32,6 +32,12 @@ clear_bash_history() {
 #--------------------------------------------------------------------------------------------------------------------------------
 #http://askubuntu.com/questions/191999/how-to-clear-bash-history-completely
 cat /dev/null > ~/.bash_history
+#http://serverfault.com/questions/332459/how-do-i-delete-values-from-the-debconf-database
+#clear root mysql password from debconf
+if hash mysqld  2>/dev/null; then
+echo PURGE | debconf-communicate mariadb-server-10.0
+fi
+
 }
 
 get_user_input () {
