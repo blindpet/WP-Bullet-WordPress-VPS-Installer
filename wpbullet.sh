@@ -638,8 +638,11 @@ if (find /var/run -iname miniserv.pid > /dev/null); then
 cp $MONITCONFIGSFOLDER/webmin /etc/monit/conf.d/webmin
 fi
 #make sure nginx is listening on the right port
-if !(lsof | grep LISTEN | grep 8080 >/dev/null); then
+if (grep "listen 8080;" /etc/nginx/sites-enabled/wordpress >/dev/null); then
 sed -i 's/8080/80/' /etc/monit/conf.d/nginx
+fi
+if (grep "listen 443;" /etc/nginx/sites-enabled/wordpress >/dev/null); then
+sed -i 's/8080/443/' /etc/monit/conf.d/nginx
 fi
 service monit restart
 }
