@@ -76,16 +76,6 @@ if (req.method == "BAN") {
   # For Testing: If you want to test with Varnish passing (not caching) uncomment
   # return( pass );
 
-  # FORWARD THE IP OF THE REQUEST
-  if (req.restarts == 0) {
-    if (req.http.x-forwarded-for) {
-      set req.http.X-Forwarded-For =
-      req.http.X-Forwarded-For + ", " + client.ip;
-    } else {
-      set req.http.X-Forwarded-For = client.ip;
-    }
-  }
-
 # DO NOT CACHE RSS FEED
  if (req.url ~ "/feed(/)?") {
 	return ( pass ); 
