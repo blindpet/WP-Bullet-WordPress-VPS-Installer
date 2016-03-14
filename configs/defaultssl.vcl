@@ -174,7 +174,7 @@ sub vcl_miss {
   return (fetch);
 }
 
-# MISS FUNCTION
+# SYNTH FUNCTION
 # ##########################################################
 sub vcl_synth {
     if (resp.status == 850) {
