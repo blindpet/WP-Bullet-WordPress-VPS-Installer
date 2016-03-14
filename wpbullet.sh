@@ -649,7 +649,7 @@ install_wp () {
 # Install wp
 #--------------------------------------------------------------------------------------------------------------------------------
 #run commands inside WORDPRESSITE directory e.g. wp plugin install wordpress-seo --activate --allow-root
-wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -O /usr/bin/wp
+wget -q https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -O /usr/bin/wp
 chmod 755 /usr/bin/wp
 PHPCLI=$(find / -iname php.ini | grep cli)
 #grep suhosin.executor.include.whitelist
@@ -669,6 +669,15 @@ echo "/swapfile   none    swap    sw    0   0" >> /etc/fstab
 echo "vm.swappiness = 10" >> /etc/sysctl.conf
 echo "vm.vfs_cache_pressure = 50" >> /etc/sysctl.conf
 sysctl -p
+}
+
+install_unattended () {
+#--------------------------------------------------------------------------------------------------------------------------------
+# Install and activate unattended upgrades
+#--------------------------------------------------------------------------------------------------------------------------------
+debconf-apt-progress -- apt-get update
+echo "unattended-upgrades unattended-upgrades/enable_auto_updates boolean true" | debconf-set-selections
+debconf-apt-progress -- apt-get install unattended-upgrades -y
 }
 
 #--------------------------------------------------------------------------------------------------------------------------------
@@ -696,6 +705,7 @@ whiptail --ok-button "Install" --title "WP Bullet VPS Installer for Ubuntu/Debia
 "Memcached" "Install Memcached" off \
 "Monit" "Monitor your programs" off \
 "wp-cli" "WordPress command line" off \
+"Automatic security updates" "Automatic security updates" off \
 "Create SWAP File" "Creates SWAP on your VPS" off 2>results
 while read choice
 do
@@ -711,6 +721,7 @@ case $choice in
 	"Memcached") 				ins_memcached="true";;
 	"Monit") 				ins_monit="true";;
 	"wp-cli") 				ins_wp="true";;
+	"Automatic security updates") 		ins_unattended="true";;
 	"Create SWAP File") 			ins_swap="true";;
                 *)
                 ;;
@@ -727,6 +738,7 @@ if [[ "$ins_redis" == "true" ]]; 			then install_redis;			fi
 if [[ "$ins_memcached" == "true" ]]; 			then install_memcached;			fi
 if [[ "$ins_monit" == "true" ]]; 			then install_monit;			fi
 if [[ "$ins_wp" == "true" ]]; 				then install_wp;			fi
+if [[ "$ins_unattended" == "true" ]]; 			then install_unattended;		fi
 if [[ "$ins_swap" == "true" ]]; 			then install_swap;			fi
 
 show_summary
