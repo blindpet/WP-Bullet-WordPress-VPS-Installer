@@ -286,7 +286,7 @@ install_wordpress () {
 #--------------------------------------------------------------------------------------------------------------------------------
 mkdir -p /var/www/${WORDPRESSSITE}
 cd /var/www/${WORDPRESSSITE}
-wget http://wordpress.org/latest.tar.gz
+wget -q http://wordpress.org/latest.tar.gz
 tar --strip-components=1 -xf latest.tar.gz
 rm latest.tar.gz
 chown -R www-data:www-data /var/www/${WORDPRESSSITE}
