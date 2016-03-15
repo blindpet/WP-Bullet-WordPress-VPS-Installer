@@ -226,7 +226,8 @@ install_wordpress
 #echo "if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
 #        \$_SERVER['HTTPS']='on';" >> /var/www/${WORDPRESSSITE}/wp-config.php
 rm /var/www/${WORDPRESSSITE}/wp-config.php
-cp configs/wp-config.php /var/www/${WORDPRESSSITE}/wp-config.php
+WPCONFIG=$(find / -iname wp-config.php | grep configs)
+cp $WPCONFIG /var/www/${WORDPRESSSITE}/wp-config.php
 sed -i "/define('DB_NAME', 'database_name_here');/c\define('DB_NAME', '${WORDPRESSSQLDB}');" /var/www/${WORDPRESSSITE}/wp-config.php
 sed -i "/define('DB_USER', 'username_here');/c\define('DB_USER', '${WORDPRESSSQLUSER}');" /var/www/${WORDPRESSSITE}/wp-config.php
 sed -i "/define('DB_PASSWORD', 'password_here');/c\define('DB_PASSWORD', '${WORDPRESSSQLPASS}');" /var/www/${WORDPRESSSITE}/wp-config.php
@@ -324,7 +325,8 @@ echo "mariadb-server-10.0 mysql-server/root_password password ${MYSQLROOTPASS}" 
 echo "mariadb-server-10.0 mysql-server/root_password_again password ${MYSQLROOTPASS}" | debconf-set-selections
 debconf-apt-progress -- apt-get -y install mariadb-server mariadb-client
 mv /etc/mysql/my.conf /etc/mysql/my.conf.bak
-cp configs/my.conf /etc/mysql/my.conf
+MYCONF=$(find / -iname my.conf | grep configs)
+cp $MYCONF /etc/mysql/my.conf
 service mysql restart
 }
 
