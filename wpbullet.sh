@@ -223,8 +223,8 @@ sed -i s"/DOMAIN/${WORDPRESSSITE}/" /etc/varnish/default.vcl
 install_haproxy
 install_wordpress
 #WordPress SSL fix now use different vcl
-#echo "if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
-#        \$_SERVER['HTTPS']='on';" >> /var/www/${WORDPRESSSITE}/wp-config.php
+echo "if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+        \$_SERVER['HTTPS']='on';" >> /var/www/${WORDPRESSSITE}/wp-config.php
 #Fix CloudFlare IP
 cat > /etc/nginx/conf.d/cloudflare.conf<<EOF
 #CloudFlare
