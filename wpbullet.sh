@@ -35,7 +35,7 @@ cat /dev/null > ~/.bash_history
 #http://serverfault.com/questions/332459/how-do-i-delete-values-from-the-debconf-database
 #clear root mysql password from debconf
 if hash mysqld  2>/dev/null; then
-echo PURGE | debconf-communicate mariadb-server-10.0
+echo PURGE | debconf-communicate mariadb-server-10.0 > /dev/null
 fi
 
 }
@@ -324,10 +324,11 @@ debconf-apt-progress -- apt-get install debconf -y
 echo "mariadb-server-10.0 mysql-server/root_password password ${MYSQLROOTPASS}" | debconf-set-selections
 echo "mariadb-server-10.0 mysql-server/root_password_again password ${MYSQLROOTPASS}" | debconf-set-selections
 debconf-apt-progress -- apt-get -y install mariadb-server mariadb-client
+service mysql restart
 mv /etc/mysql/my.conf /etc/mysql/my.conf.bak
 MYCONF=$(find / -iname my.conf | grep configs)
 cp $MYCONF /etc/mysql/my.conf
-service mysql restart
+service mysql reload
 }
 
 install_varnish (){
