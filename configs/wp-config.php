@@ -1,7 +1,3 @@
-SALTS=$(wget -q https://api.wordpress.org/secret-key/1.1/salt/ -O -)
-wget https://api.wordpress.org/secret-key/1.1/salt/ -O - | awk -F [\'] '{print $4}'
-
-
 <?php
 /**
  * The base configuration for WordPress
