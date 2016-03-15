@@ -325,9 +325,9 @@ echo "mariadb-server-10.0 mysql-server/root_password password ${MYSQLROOTPASS}" 
 echo "mariadb-server-10.0 mysql-server/root_password_again password ${MYSQLROOTPASS}" | debconf-set-selections
 debconf-apt-progress -- apt-get -y install mariadb-server mariadb-client
 service mysql restart
-mv /etc/mysql/my.conf /etc/mysql/my.conf.bak
-MYCONF=$(find / -iname my.conf | grep configs)
-cp $MYCONF /etc/mysql/my.conf
+mv /etc/mysql/my.cnf /etc/mysql/my.cnf.bak
+MYCONF=$(find / -iname my.cnf | grep configs)
+cp $MYCONF /etc/mysql/my.cnf
 service mysql reload
 }
 
