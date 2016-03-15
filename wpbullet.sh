@@ -351,6 +351,7 @@ ExecStart=/usr/sbin/varnishd -a :80 -T localhost:6082 -f /etc/varnish/default.vc
 EOF
 systemctl daemon-reload
 mv /etc/varnish/default.vcl /etc/varnish/default.vcl.bak
+systemctl enable varnish
 }
 
 install_haproxy () {
