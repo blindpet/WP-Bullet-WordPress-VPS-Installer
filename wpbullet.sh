@@ -223,8 +223,17 @@ sed -i s"/DOMAIN/${WORDPRESSSITE}/" /etc/varnish/default.vcl
 install_haproxy
 install_wordpress
 #WordPress SSL fix now use different vcl
-echo "if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
-        \$_SERVER['HTTPS']='on';" >> /var/www/${WORDPRESSSITE}/wp-config.php
+#echo "if (\$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+#        \$_SERVER['HTTPS']='on';" >> /var/www/${WORDPRESSSITE}/wp-config.php
+rm /var/www/${WORDPRESSSITE}/wp-config.php
+cp configs/wp-config.php /var/www/${WORDPRESSSITE}/wp-config.php
+sed -i "/define('DB_NAME', 'database_name_here');/c\define('DB_NAME', '${WORDPRESSSQLDB}');" /var/www/${WORDPRESSSITE}/wp-config.php
+sed -i "/define('DB_USER', 'username_here');/c\define('DB_USER', '${WORDPRESSSQLUSER}');" /var/www/${WORDPRESSSITE}/wp-config.php
+sed -i "/define('DB_PASSWORD', 'password_here');/c\define('DB_PASSWORD', '${WORDPRESSSQLPASS}');" /var/www/${WORDPRESSSITE}/wp-config.php
+sed -i "s/sitename/${WORDPRESSSITE}/" /var/www/${WORDPRESSSITE}/wp-config.php
+chown -R www-data:www-data /var/www/${WORDPRESSSITE}/
+chmod 755 /var/www/${WORDPRESSSITE}/
+chmod 644 /var/www/${WORDPRESSSITE}/wp-config.php
 #Fix CloudFlare IP
 cat > /etc/nginx/conf.d/cloudflare.conf<<EOF
 #CloudFlare
