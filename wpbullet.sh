@@ -650,15 +650,17 @@ do
   fi
 done
 #hashing webmin doesn't work so check for the pid file instead
-if (find /var/run -iname miniserv.pid > /dev/null); then
+if [ -e /var/run/miniserv.pid ]; then
 cp $MONITCONFIGSFOLDER/webmin /etc/monit/conf.d/webmin
 fi
 #make sure nginx is listening on the right port
+if hash nginx  2>/dev/null; then
 if (grep "listen 8080;" /etc/nginx/sites-enabled/wordpress >/dev/null); then
 sed -i 's/8080/80/' /etc/monit/conf.d/nginx
 fi
 if (grep "listen 443;" /etc/nginx/sites-enabled/wordpress >/dev/null); then
 sed -i 's/8080/443/' /etc/monit/conf.d/nginx
+fi
 fi
 service monit restart
 }
