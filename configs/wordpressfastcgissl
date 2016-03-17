@@ -39,7 +39,7 @@ server {
 	limit_req_status 444;
 	}
 
-	location ~* /\?s\=|xmlrpc\.php {
+	location = /xmlrpc.php {
 	limit_req   zone=one  burst=1 nodelay;
 	include fastcgi_params;
 	fastcgi_pass unix:/var/run/php5-fpm.sock;
