@@ -10,15 +10,8 @@ server {
 	root /var/www/example.com/;
 	index index.php;
 	
-	location = /wp-login.php {
-	limit_req   zone=one  burst=1 nodelay;
-	include fastcgi_params;
-	fastcgi_pass unix:/var/run/php5-fpm.sock;
-	fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-	limit_req_status 444;
-	}
-
-	location = /xmlrpc.php {
+	#captures wp-login and xmlrpc requests
+	location ~ (wp-login|xmlrpc)\.php {
 	limit_req   zone=one  burst=1 nodelay;
 	include fastcgi_params;
 	fastcgi_pass unix:/var/run/php5-fpm.sock;
