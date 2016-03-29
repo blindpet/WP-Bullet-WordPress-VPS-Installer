@@ -77,7 +77,7 @@ get_user_input
 #fi
 install_dotdeb
 install_nginx
-cp configs/wordpressfastcgi /etc/nginx/sites-available/wordpress
+cp configs/nginx/wordpressfastcgi /etc/nginx/sites-available/wordpress
 ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
 install_mariadb
@@ -124,7 +124,7 @@ mkdir -p /etc/nginx/ssl
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/C=/ST=/L=/O=Company Name/OU=Org/CN=${WORDPRESSSITE}"
 install_dotdeb
 install_nginx
-cp configs/wordpressfastcgissl /etc/nginx/sites-available/wordpress
+cp configs/nginx/wordpressfastcgissl /etc/nginx/sites-available/wordpress
 ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
 install_mariadb
@@ -166,7 +166,7 @@ install_nginx_varnish () {
 get_user_input
 install_dotdeb
 install_nginx
-cp configs/wordpressvarnish /etc/nginx/sites-available/wordpress
+cp configs/nginx/wordpressvarnish /etc/nginx/sites-available/wordpress
 ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
 install_mariadb
@@ -212,7 +212,7 @@ install_nginx_varnish_haproxy () {
 get_user_input
 install_dotdeb
 install_nginx
-cp configs/wordpressvarnish /etc/nginx/sites-available/wordpress
+cp configs/nginx/wordpressvarnish /etc/nginx/sites-available/wordpress
 ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
 install_mariadb
