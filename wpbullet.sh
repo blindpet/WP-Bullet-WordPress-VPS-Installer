@@ -269,27 +269,27 @@ service haproxy restart
 
 install_apache () {
 #--------------------------------------------------------------------------------------------------------------------------------
-# Install nginx with fastcgi caching
+# Install Apache with WordPress
 #--------------------------------------------------------------------------------------------------------------------------------
 get_user_input
 install_dotdeb
 debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install apache2 php5 libapache2-mod-php5 php5-mcrypt php5-gd php5-cgi php5-common php5-curl -y
-cat > nano /etc/apache2/mods-enabled/dir.conf <<EOF
+cat > /etc/apache2/mods-enabled/dir.conf <<EOF
 <IfModule mod_dir.c>
     DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
 </IfModule>
 EOF
-cp configs/apache/apache2.conf /etc/apache2/apache2.conf
-cp configs/apache/apache2vhost.conf /etc/apache2/sites-available/${WORDPRESSSITE}
-sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
+APACHEDIR=$(find / -iname apache | grep configs)
+cp $APACHEDIR/apache2.conf /etc/apache2/apache2.conf
+cp $APACHEDIR/apache2vhost.conf /etc/apache2/sites-available/${WORDPRESSSITE}
+sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/apache2/sites-available/${WORDPRESSSITE}
 install_mariadb
 install_wordpress
 a2dissite 000-default
 a2ensite ${WORDPRESSSITE}
 a2enmod rewrite
 service apache2 restart
-service php5-fpm restart
 
 }
 
