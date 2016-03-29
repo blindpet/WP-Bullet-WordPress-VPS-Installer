@@ -274,7 +274,7 @@ install_apache () {
 get_user_input
 install_dotdeb
 debconf-apt-progress -- apt-get update
-debconf-apt-progress -- apt-get install apache2 php5 libapache2-mod-php5 php5-mcrypt php5-gd php5-cgi php5-common php5-curl -y
+debconf-apt-progress -- apt-get install apache2 php5 libapache2-mod-php5 php5-mcrypt php5-mysql php5-gd php5-cgi php5-common php5-curl -y
 mkdir -p /etc/apache2/conf.d
 cat > /etc/apache2/mods-enabled/dir.conf <<EOF
 <IfModule mod_dir.c>
