@@ -275,6 +275,7 @@ get_user_input
 install_dotdeb
 debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install apache2 php5 libapache2-mod-php5 php5-mcrypt php5-gd php5-cgi php5-common php5-curl -y
+mkdir -p /etc/apache2/conf.d
 cat > /etc/apache2/mods-enabled/dir.conf <<EOF
 <IfModule mod_dir.c>
     DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
@@ -282,7 +283,7 @@ cat > /etc/apache2/mods-enabled/dir.conf <<EOF
 EOF
 APACHEDIR=$(find / -iname apache | grep configs)
 cp $APACHEDIR/apache2.conf /etc/apache2/apache2.conf
-cp $APACHEDIR/apache2vhost.conf /etc/apache2/sites-available/${WORDPRESSSITE}
+cp $APACHEDIR/apache2vhost /etc/apache2/sites-available/${WORDPRESSSITE}
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/apache2/sites-available/${WORDPRESSSITE}
 install_mariadb
 install_wordpress
