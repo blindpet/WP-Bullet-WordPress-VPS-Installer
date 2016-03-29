@@ -284,7 +284,7 @@ EOF
 APACHEDIR=$(find / -iname apache | grep configs)
 cp $APACHEDIR/apache2.conf /etc/apache2/apache2.conf
 cp $APACHEDIR/apache2vhost /etc/apache2/sites-available/${WORDPRESSSITE}.conf
-sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/apache2/sites-available/${WORDPRESSSITE}
+sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/apache2/sites-available/${WORDPRESSSITE}.conf
 install_mariadb
 install_wordpress
 a2dissite 000-default
