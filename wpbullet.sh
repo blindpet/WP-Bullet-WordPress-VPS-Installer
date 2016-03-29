@@ -267,6 +267,32 @@ service varnish restart
 service haproxy restart
 }
 
+install_apache () {
+#--------------------------------------------------------------------------------------------------------------------------------
+# Install nginx with fastcgi caching
+#--------------------------------------------------------------------------------------------------------------------------------
+get_user_input
+install_dotdeb
+debconf-apt-progress -- apt-get update
+debconf-apt-progress -- apt-get install apache2 php5 libapache2-mod-php5 php5-mcrypt php5-gd php5-cgi php5-common php5-curl -y
+cat > nano /etc/apache2/mods-enabled/dir.conf <<EOF
+<IfModule mod_dir.c>
+    DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+</IfModule>
+EOF
+cp configs/apache/apache2.conf /etc/apache2/apache2.conf
+cp configs/apache/apache2vhost.conf /etc/apache2/sites-available/${WORDPRESSSITE}
+sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/nginx/sites-enabled/wordpress
+install_mariadb
+install_wordpress
+a2dissite 000-default
+a2ensite ${WORDPRESSSITE}
+a2enmod rewrite
+service apache2 restart
+service php5-fpm restart
+
+}
+
 install_dotdeb () {
 #--------------------------------------------------------------------------------------------------------------------------------
 # Install dotdeb repo
@@ -723,6 +749,7 @@ whiptail --ok-button "Install" --title "WP Bullet VPS Installer for Ubuntu/Debia
 "nginx + fastcgi caching ssl" "nginx ssl with fastcgi caching        " off \
 "nginx + Varnish" "nginx with Varnish caching        " off \
 "nginx + Varnish + haproxy" "nginx + Varnish caching + haproxy SSL" off \
+"Apache" "Apache" off \
 "Webmin" "Easy GUI VPS administration" off \
 "CSF Firewall" "Comprehensive Firewall" off \
 "Suhosin" "Enable PHP Security" off \
@@ -739,6 +766,7 @@ case $choice in
 	"nginx + fastcgi caching ssl") 		ins_nginx_fastcgissl="true";;
 	"nginx + Varnish") 			ins_nginx_varnish="true";;
 	"nginx + Varnish + haproxy") 		ins_nginx_varnish_haproxy="true";;
+	"Apache") 				ins_apache="true";;
 	"Webmin") 				ins_webmin="true";;
 	"CSF Firewall") 			ins_csf="true";;
 	"Suhosin") 				ins_suhosin="true";;
@@ -756,6 +784,7 @@ if [[ "$ins_nginx_fastcgi" == "true" ]]; 		then install_nginx_fastcgi;		fi
 if [[ "$ins_nginx_fastcgissl" == "true" ]]; 		then install_nginx_fastcgissl;		fi
 if [[ "$ins_nginx_varnish" == "true" ]]; 		then install_nginx_varnish;		fi
 if [[ "$ins_nginx_varnish_haproxy" == "true" ]]; 	then install_nginx_varnish_haproxy;	fi
+if [[ "$ins_apache" == "true" ]]; 			then install_apache;			fi
 if [[ "$ins_webmin" == "true" ]]; 			then install_webmin;			fi
 if [[ "$ins_csf" == "true" ]]; 				then install_csf;			fi
 if [[ "$ins_suhosin" == "true" ]]; 			then install_suhosin;			fi
