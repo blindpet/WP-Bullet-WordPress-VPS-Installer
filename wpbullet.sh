@@ -283,7 +283,7 @@ cat > /etc/apache2/mods-enabled/dir.conf <<EOF
 EOF
 APACHEDIR=$(find / -iname apache | grep configs)
 cp $APACHEDIR/apache2.conf /etc/apache2/apache2.conf
-cp $APACHEDIR/apache2vhost /etc/apache2/sites-available/${WORDPRESSSITE}
+cp $APACHEDIR/apache2vhost /etc/apache2/sites-available/${WORDPRESSSITE}.conf
 sed -i s"/example.com/${WORDPRESSSITE}/g" /etc/apache2/sites-available/${WORDPRESSSITE}
 install_mariadb
 install_wordpress
