@@ -52,7 +52,7 @@ MYSQLROOTPASS=$(whiptail --inputbox "Choose the MySQL root password" 8 78 $MYSQL
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 WORDPRESSSQLDB=$(whiptail --inputbox "Choose the WordPress MySQL database name" 8 78 "WordPressDB" --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
-WORDPRESSSQLUSER=$(whiptail --inputbox "Choose the WordPress MySQL user" 8 78 "WordPressMySQLuser" --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
+WORDPRESSSQLUSER=$(whiptail --inputbox "Choose the WordPress MySQL user" 8 78 "WPMySQLuser" --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
 exitstatus=$?; if [ $exitstatus = 1 ]; then exit 1; fi
 WORDPRESSSQLPASS=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
 WORDPRESSSQLPASS=$(whiptail --inputbox "Choose the WordPress MySQL password" 8 78 $WORDPRESSSQLPASS --title "WP-Bullet.com" 3>&1 1>&2 2>&3)
@@ -311,7 +311,7 @@ install_nginx () {
 install_dotdeb
 debconf-apt-progress -- apt-get update
 debconf-apt-progress -- apt-get install nginx -y
-cp configs/nginx.conf /etc/nginx/nginx.conf
+cp configs/nginx/nginx.conf /etc/nginx/nginx.conf
 unlink /etc/nginx/sites-enabled/default
 debconf-apt-progress -- apt-get install curl php5-curl php5-mysql php5-cli php5-fpm php5-gd -y
 cp configs/www.conf /etc/php5/fpm/pool.d/www.conf
